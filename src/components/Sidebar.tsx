@@ -1,73 +1,136 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Camera,
-  Wallet,
-  ShieldCheck,
-  Settings,
-  Eye,
-} from 'lucide-react';
-
-const navItems = [
-  { href: '/', label: 'Overview', icon: LayoutDashboard },
-  { href: '/feed', label: 'Detection Feed', icon: Camera },
-  { href: '/rewards', label: 'Reward Wallet', icon: Wallet },
-  { href: '/compliance', label: 'Legal Compliance', icon: ShieldCheck },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
+import { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase";
+import { 
+  BarChart3, 
+  MapPin, 
+  Settings, 
+  History, 
+  ShieldCheck, 
+  ChevronRight, 
+  LogOut,
+  User,
+  CreditCard,
+  Target,
+  Car,
+  Bike
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single()
+          .then(({ data }) => setProfile(data));
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
+  const navItems = [
+    { label: "Overview", icon: Target, href: "/" },
+    { label: "Live Detection", icon: History, href: "/feed" },
+    { label: "Reward Wallet", icon: CreditCard, href: "/rewards" },
+    { label: "Map Interface", icon: MapPin, href: "/map" },
+    { label: "Compliance Log", icon: ShieldCheck, href: "/compliance" },
+    { label: "Settings", icon: Settings, href: "/settings" },
+  ];
 
   return (
-    <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col bg-white border-r border-slate-200">
+    <aside className="fixed left-0 top-0 h-screen w-80 bg-white border-r border-slate-100 flex flex-col p-8 z-50">
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-slate-100">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500">
-          <Eye className="w-4 h-4 text-white" />
+      <div className="flex items-center gap-4 mb-12 group">
+        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-100 group-hover:bg-blue-700 transition-colors">
+          <ShieldCheck className="text-white w-6 h-6" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-slate-900 leading-tight">WatchOut</p>
-          <p className="text-[10px] text-slate-400 leading-tight">AI Enforcement</p>
+          <h2 className="text-xl font-black text-slate-800 tracking-tight">WatchOut</h2>
+          <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Pilot 2026.4</p>
         </div>
       </div>
 
+      {/* Profile Card */}
+      {user ? (
+        <div className="mb-10 p-5 bg-slate-50 rounded-[28px] border border-slate-100/50 group hover:bg-slate-100 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-slate-100">
+               {profile?.vehicle_type === 'bike' ? <Bike className="w-5 h-5 text-slate-400" /> : <Car className="w-5 h-5 text-slate-400" />}
+            </div>
+            <div className="flex-1 overflow-hidden">
+               <p className="text-sm font-extrabold text-slate-800 truncate leading-none mb-1">
+                 {profile?.full_name || "Profile Incomplete"}
+               </p>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">
+                 {profile?.registration_number || user.email}
+               </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <Link href="/login" className="mb-10 text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center justify-center gap-2 py-4 bg-blue-50 rounded-2xl">
+          <User className="w-4 h-4" /> Sign In to Start
+        </Link>
+      )}
+
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href;
+      <nav className="flex-1 space-y-2">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
           return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                active
-                  ? 'bg-sky-50 text-sky-600'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
+            <Link 
+              key={item.href} 
+              href={item.href}
+              className={`flex items-center justify-between p-4 rounded-2xl transition-all group ${
+                isActive 
+                  ? "bg-slate-900 text-white shadow-xl shadow-slate-200" 
+                  : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
               }`}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-sky-500' : 'text-slate-400'}`} />
-              {label}
+              <div className="flex items-center gap-4">
+                <item.icon className={`w-5 h-5 transition-colors ${isActive ? "text-blue-400" : "group-hover:text-blue-600"}`} />
+                <span className="text-sm font-bold tracking-tight">{item.label}</span>
+              </div>
+              {isActive && (
+                <motion.div layoutId="activeNav" className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
+              )}
             </Link>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="px-5 py-4 border-t border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-xs font-semibold text-sky-600">
-            U
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-slate-700 truncate">User</p>
-            <p className="text-[10px] text-slate-400 truncate">Active Device</p>
-          </div>
-          <div className="ml-auto w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-        </div>
+      <div className="mt-auto pt-8 border-t border-slate-50">
+        <button 
+          onClick={handleLogout}
+          className="w-full flex items-center gap-4 p-4 rounded-2xl text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all font-bold text-sm"
+        >
+          <LogOut className="w-5 h-5" />
+          Log Out
+        </button>
       </div>
     </aside>
   );
