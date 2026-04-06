@@ -1,21 +1,16 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Sidebar } from "@/components/Sidebar";
+import type { Metadata } from 'next';
+import { Geist } from 'next/font/google';
+import './globals.css';
+import Sidebar from '@/components/Sidebar';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const geist = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: "WatchOut | AI Dashcam Enforcement Dashboard",
-  description: "Secure, privacy-first traffic violation reporting and reward management system.",
+  title: 'WatchOut — AI Traffic Enforcement',
+  description: 'AI-powered dashcam violation detection and reward platform',
 };
 
 export default function RootLayout({
@@ -24,14 +19,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="flex h-screen overflow-hidden bg-background text-foreground font-sans">
+    <html lang="en" className={`${geist.variable} h-full`}>
+      <body className="h-full flex bg-slate-50 antialiased">
         <Sidebar />
-        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-          <div className="flex-1 p-8">
-            {children}
-          </div>
-        </main>
+        <main className="flex-1 overflow-y-auto min-h-screen">{children}</main>
       </body>
     </html>
   );

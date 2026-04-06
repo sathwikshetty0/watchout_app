@@ -1,86 +1,74 @@
-"use client";
+'use client';
 
-import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Video, 
-  Wallet, 
-  FileCheck, 
-  Settings, 
-  LogOut, 
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  LayoutDashboard,
+  Camera,
+  Wallet,
   ShieldCheck,
-  Zap
-} from "lucide-react";
-import { motion } from "framer-motion";
+  Settings,
+  Eye,
+} from 'lucide-react';
 
 const navItems = [
-  { name: "Overview", icon: LayoutDashboard, href: "/" },
-  { name: "Live Feed", icon: Video, href: "/feed" },
-  { name: "Reward Wallet", icon: Wallet, href: "/rewards" },
-  { name: "Compliance Log", icon: FileCheck, href: "/compliance" },
-  { name: "Settings", icon: Settings, href: "/settings" },
+  { href: '/', label: 'Overview', icon: LayoutDashboard },
+  { href: '/feed', label: 'Detection Feed', icon: Camera },
+  { href: '/rewards', label: 'Reward Wallet', icon: Wallet },
+  { href: '/compliance', label: 'Legal Compliance', icon: ShieldCheck },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-export const Sidebar = () => {
+export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col h-screen w-64 bg-white border-r border-slate-200">
-      <div className="flex items-center gap-3 p-6 mb-4">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
-          <Zap className="w-6 h-6 fill-current" />
+    <aside className="w-60 shrink-0 h-screen sticky top-0 flex flex-col bg-white border-r border-slate-200">
+      {/* Brand */}
+      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-slate-100">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500">
+          <Eye className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">WatchOut</h1>
-          <p className="text-[10px] font-medium text-secondary uppercase tracking-widest leading-none">AI Surveillance</p>
+          <p className="text-sm font-semibold text-slate-900 leading-tight">WatchOut</p>
+          <p className="text-[10px] text-slate-400 leading-tight">AI Enforcement</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href;
           return (
             <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                isActive 
-                  ? "bg-primary text-white shadow-md shadow-primary/10" 
-                  : "text-secondary hover:bg-slate-50 hover:text-foreground"
+              key={href}
+              href={href}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                active
+                  ? 'bg-sky-50 text-sky-600'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'
               }`}
             >
-              <item.icon className="w-5 h-5 transition-transform group-hover:scale-110" />
-              <span className="font-medium text-sm">{item.name}</span>
-              {isActive && (
-                <motion.div
-                  layoutId="active-pill"
-                  className="ml-auto w-1.5 h-1.5 rounded-full bg-white"
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
+              <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-sky-500' : 'text-slate-400'}`} />
+              {label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-4 mt-auto">
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <ShieldCheck className="w-4 h-4 text-success" />
-            <span className="text-xs font-semibold text-foreground">Compliance Active</span>
+      {/* Footer */}
+      <div className="px-5 py-4 border-t border-slate-100">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-full bg-sky-100 flex items-center justify-center text-xs font-semibold text-sky-600">
+            U
           </div>
-          <p className="text-[10px] text-secondary leading-relaxed">
-            Privacy masking & BSA Sec 63 digital signature active.
-          </p>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-slate-700 truncate">User</p>
+            <p className="text-[10px] text-slate-400 truncate">Active Device</p>
+          </div>
+          <div className="ml-auto w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
         </div>
-        
-        <button className="flex items-center gap-3 w-full px-4 py-3 text-secondary hover:text-red-500 hover:bg-red-50 transition-colors rounded-xl font-medium text-sm group">
-          <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-          <span>Sign Out</span>
-        </button>
       </div>
-    </div>
+    </aside>
   );
-};
+}

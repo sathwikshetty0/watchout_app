@@ -1,143 +1,150 @@
-"use client";
+'use client';
 
-import React from "react";
-import { 
-  FileCheck, 
-  ShieldCheck, 
-  Lock, 
-  Search, 
-  Database,
-  ExternalLink,
-  ChevronRight,
-  FileText
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { ShieldCheck, Download, Hash, Clock, FileCheck } from 'lucide-react';
 
-const certificates = [
+interface Certificate {
+  id: string;
+  detectionId: string;
+  violation: string;
+  issuedAt: string;
+  plate: string;
+  sha256: string;
+  signature: string;
+  status: 'Valid' | 'Pending';
+}
+
+const certificates: Certificate[] = [
   {
-    id: "BSA-63-0012",
-    violationId: "V-9021",
-    type: "Digital Evidence Certificate",
-    timestamp: "Apr 6, 2026 14:32:10 IST",
-    hash: "f4a1...2c8d",
-    status : "Verified",
-    signer: "Police Forensic Node #04"
+    id: 'CERT-20260406-001',
+    detectionId: 'DET-001',
+    violation: 'Red Light Jump',
+    issuedAt: '2026-04-06 14:33:02',
+    plate: 'KA 01 AB 1234',
+    sha256: '3a7f2e9c1b4d806f5c291ae3b72e1d034ca8f921e6b5047da3f9c2e1b7d804f6',
+    signature: 'MEUCIQDkZ2x9...rT4bN==',
+    status: 'Valid',
   },
   {
-    id: "BSA-63-0011",
-    violationId: "V-8995",
-    type: "Digital Evidence Certificate",
-    timestamp: "Apr 6, 2026 12:15:45 IST",
-    hash: "b9e3...a0f1",
-    status : "Verified",
-    signer: "Police Forensic Node #04"
+    id: 'CERT-20260406-002',
+    detectionId: 'DET-004',
+    violation: 'Red Light Jump',
+    issuedAt: '2026-04-06 13:33:15',
+    plate: 'KA 02 CD 3456',
+    sha256: 'd54c7b19e280af43c7d9512ec18a4f72b39d05e7a2cf631bb72e1d034ca8f921',
+    signature: 'MEQCIHpF8y1b...mX9cA==',
+    status: 'Valid',
   },
   {
-    id: "BSA-63-0010",
-    violationId: "V-8954",
-    type: "Digital Evidence Certificate",
-    timestamp: "Apr 5, 2026 18:20:00 IST",
-    hash: "d7c2...5b9e",
-    status : "Verified",
-    signer: "Police Forensic Node #02"
-  }
+    id: 'CERT-20260406-003',
+    detectionId: 'DET-002',
+    violation: 'No Helmet',
+    issuedAt: '2026-04-06 14:15:30',
+    plate: 'KA 03 MN 5678',
+    sha256: 'b72e1d034ca8f921e6b5047da3f9c2e1b7d804f63a7f2e9c1b4d806f5c291ae3',
+    signature: '—',
+    status: 'Pending',
+  },
 ];
 
-export const ComplianceLog = () => {
+const violationColors: Record<string, string> = {
+  'Red Light Jump': 'bg-red-50 text-red-600',
+  'No Helmet': 'bg-amber-50 text-amber-600',
+  'Wrong-Way': 'bg-orange-50 text-orange-600',
+};
+
+export default function ComplianceLog() {
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <header className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">Compliance & Legal Log</h2>
-        <p className="text-secondary">Official Bharatiya Sakshya Adhiniyam, 2023 (Sec 63) Evidence Certificates.</p>
-      </header>
-
-      <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-4">
-        <div className="p-2 rounded-xl bg-success text-white">
-          <ShieldCheck className="w-6 h-6" />
-        </div>
-        <div>
-          <h4 className="text-sm font-bold text-success uppercase tracking-widest leading-none mb-2">Evidence Integrity Guaranteed</h4>
-          <p className="text-xs text-emerald-700/80 leading-relaxed font-medium">
-            All submitted evidence is cryptographically hashed at the point of capture and digitally signed by authorized police forensic nodes. This ensures full admissibility under Section 63 of the BSA, 2023.
-          </p>
-        </div>
+    <div className="p-6 space-y-6">
+      <div>
+        <h1 className="text-xl font-semibold text-slate-900">Legal Compliance</h1>
+        <p className="text-sm text-slate-400 mt-0.5">
+          Evidence certificates generated under BSA 2023 Sec 63
+        </p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-50 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-            <FileText className="w-4 h-4 text-primary" /> Active Certificates
-          </div>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by ID..." 
-              className="pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-100 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-        </div>
-
-        <div className="divide-y divide-slate-50">
-          {certificates.map((cert) => (
-            <div key={cert.id} className="p-5 hover:bg-slate-50 transition-colors group">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-slate-50 text-slate-400 group-hover:text-primary transition-colors">
-                    <Lock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-foreground flex items-center gap-2">
-                      {cert.id}
-                      <span className="px-2 py-0.5 rounded bg-emerald-100 text-success text-[10px] font-bold">VERIFIED</span>
-                    </h5>
-                    <p className="text-xs text-secondary font-medium">Related Violation: {cert.violationId}</p>
-                  </div>
-                </div>
-                <button className="flex items-center gap-2 text-xs font-bold text-primary hover:bg-primary/5 px-3 py-1.5 rounded-lg transition-all">
-                  View Full Certificate <ExternalLink className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-1">
-                <div>
-                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Hashed Integrity</p>
-                  <p className="text-xs font-mono text-secondary bg-slate-50 p-1 rounded border border-slate-100">{cert.hash}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Timestamp</p>
-                  <p className="text-xs text-secondary font-medium">{cert.timestamp}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Signer</p>
-                  <p className="text-xs text-secondary font-medium">{cert.signer}</p>
-                </div>
-                <div className="text-right flex items-end justify-end">
-                  <ChevronRight className="w-5 h-5 text-slate-200 group-hover:text-primary transition-all" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Info banner */}
+      <div className="flex items-start gap-3 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3.5">
+        <ShieldCheck className="w-4 h-4 text-sky-500 mt-0.5 shrink-0" />
+        <p className="text-xs text-sky-700 leading-relaxed">
+          Each certificate is SHA-256 hashed and digitally signed at the time of detection. This
+          evidence is admissible under the <strong>Bharatiya Sakshya Adhiniyam 2023, Section 63</strong>.
+        </p>
       </div>
 
-      <div className="p-8 rounded-3xl bg-slate-900 text-white relative overflow-hidden">
-        <Database className="absolute -right-8 -bottom-8 w-48 h-48 opacity-10" />
-        <div className="relative z-10">
-          <h3 className="text-xl font-bold mb-4">Secure Storage Architecture</h3>
-          <p className="text-sm opacity-70 mb-6 max-w-lg leading-relaxed">
-            Personal data is never stored locally. Violation clips are encrypted and streamed directly to government-hosted data warehouses. Local buffer is cleared every 48 hours.
-          </p>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-xs font-bold border border-white/10">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" /> AES-256 Encrypted
+      {/* Certificate cards */}
+      <div className="space-y-4">
+        {certificates.map((cert) => (
+          <div key={cert.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+            {/* Card header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-sky-50 flex items-center justify-center">
+                  <FileCheck className="w-4 h-4 text-sky-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{cert.id}</p>
+                  <p className="text-[11px] text-slate-400">Ref: {cert.detectionId}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${
+                    cert.status === 'Valid'
+                      ? 'bg-emerald-50 text-emerald-600'
+                      : 'bg-amber-50 text-amber-500'
+                  }`}
+                >
+                  {cert.status}
+                </span>
+                {cert.status === 'Valid' && (
+                  <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg px-2.5 py-1 transition-colors">
+                    <Download className="w-3 h-3" />
+                    Export
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl text-xs font-bold border border-white/10">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" /> Direct-to-Police Pipe
+
+            {/* Card body */}
+            <div className="px-5 py-4 grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
+              <Field label="Violation Type">
+                <span className={`px-2 py-0.5 rounded-full font-medium ${violationColors[cert.violation] ?? 'bg-slate-100 text-slate-500'}`}>
+                  {cert.violation}
+                </span>
+              </Field>
+              <Field label="Vehicle Plate">
+                <span className="font-mono text-slate-700">{cert.plate}</span>
+              </Field>
+              <Field label="Issued At">
+                <span className="flex items-center gap-1 text-slate-600">
+                  <Clock className="w-3 h-3 text-slate-300" />
+                  {cert.issuedAt}
+                </span>
+              </Field>
+              <Field label="Digital Signature">
+                <span className="font-mono text-slate-500 truncate">{cert.signature}</span>
+              </Field>
+              <div className="col-span-2">
+                <p className="text-slate-400 mb-1 flex items-center gap-1">
+                  <Hash className="w-3 h-3" /> SHA-256 Hash
+                </p>
+                <p className="font-mono text-[10px] text-slate-600 bg-slate-50 rounded-lg px-3 py-2 break-all border border-slate-100">
+                  {cert.sha256}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
-};
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="text-slate-400 mb-0.5">{label}</p>
+      <div className="text-slate-700">{children}</div>
+    </div>
+  );
+}
