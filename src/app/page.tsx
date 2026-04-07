@@ -82,7 +82,7 @@ export default function HomePage() {
         </header>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-12 gap-10">
+        <div className="grid grid-cols-12 gap-10 animate-entrance">
           {/* Top Row: Quick Stats */}
           <div className="col-span-12 grid grid-cols-4 gap-8">
             <StatCard 
