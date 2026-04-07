@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase";
 import { useRouter } from "next/navigation";
-import { User, Car, Hash, ArrowRight, ShieldCheck, Mail, LogOut } from "lucide-react";
-import { motion } from "framer-motion";
+import { User, Car, Hash, ArrowRight, ShieldCheck, Mail, LogOut, CheckCircle2, Camera, Bike } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function OnboardingPage() {
+  const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
   const [vehicleType, setVehicleType] = useState<"car" | "bike">("car");
   const [regNo, setRegNo] = useState("");
@@ -14,14 +15,12 @@ export default function OnboardingPage() {
   const [email, setEmail] = useState<string | null>(null);
   const router = useRouter();
 
-  // Check auth and current progress
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
         router.push("/login");
       } else {
         setEmail(user.email ?? null);
-        // Pre-fill full name if available from metadata
         setFullName(user.user_metadata?.full_name || "");
       }
     });
@@ -29,13 +28,16 @@ export default function OnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (step < 3) {
+       setStep(step + 1);
+       return;
+    }
+    
     setLoading(true);
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No user found");
 
-      // UPSERT into profiles table
       const { error } = await supabase
         .from("profiles")
         .upsert({
@@ -62,111 +64,222 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 font-sans">
+    <div className="min-h-screen bg-[#fafbfc] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-100/30 rounded-full blur-[100px] -ml-[250px] -mt-[250px]" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-emerald-100/30 rounded-full blur-[100px] -mr-[250px] -mb-[250px]" />
+
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-2xl bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 p-12 border border-slate-100 flex flex-col md:flex-row gap-12"
+        className="w-full max-w-4xl bg-white rounded-[48px] shadow-2xl shadow-slate-200/50 p-16 border border-slate-100 flex flex-col lg:flex-row gap-20 relative z-10"
       >
-        {/* Left Side: Illustration / Welcome */}
-        <div className="flex-1 space-y-6">
-          <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center">
-            <ShieldCheck className="text-green-600 w-10 h-10" />
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight leading-tight">
-              One more step, <span className="text-blue-600">Chief</span>
-            </h1>
-            <p className="text-slate-500 font-medium text-lg">
-              We need a few details to link your Dashcam and process rewards correctly.
-            </p>
+        {/* Left: Progress & Narrative */}
+        <div className="flex-1 space-y-12">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/20">
+                <Camera className="text-white w-6 h-6" />
+             </div>
+             <h2 className="text-xl font-black text-slate-900 tracking-tighter uppercase">WatchOut</h2>
           </div>
 
-          <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100/50">
-            <div className="flex items-center gap-3 text-slate-400 mb-2">
-              <Mail className="w-4 h-4" />
-              <span className="text-sm font-semibold uppercase tracking-wider">Authenticated as</span>
-            </div>
-            <p className="text-slate-700 font-bold">{email}</p>
-            <button onClick={logout} className="mt-4 text-sm text-red-500 hover:text-red-600 font-bold flex items-center gap-2">
-              <LogOut className="w-4 h-4" /> Sign Out
-            </button>
+          <div className="space-y-6">
+             <h1 className="text-5xl font-black text-slate-800 tracking-tighter leading-[1.1]">
+                Complete your <br />
+                <span className="text-blue-600">Verification.</span>
+             </h1>
+             <p className="text-slate-500 font-bold text-sm uppercase tracking-widest leading-relaxed">
+                Step {step} of 3: {
+                  step === 1 ? "Identity Setup" : 
+                  step === 2 ? "Vehicle Registration" : 
+                  "Final Confirmation"
+                }
+             </p>
+          </div>
+
+          <div className="space-y-4">
+             <StepIndicator num={1} label="Identity" active={step >= 1} done={step > 1} />
+             <StepIndicator num={2} label="Vehicle" active={step >= 2} done={step > 2} />
+             <StepIndicator num={3} label="Deployment" active={step >= 3} done={step > 3} />
+          </div>
+
+          <div className="pt-8 border-t border-slate-50 flex items-center justify-between">
+             <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+                   <User className="w-4 h-4 text-slate-400" />
+                </div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate max-w-[120px]">{email}</span>
+             </div>
+             <button onClick={logout} className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline">Exit Setup</button>
           </div>
         </div>
 
-        {/* Right Side: Form */}
-        <form onSubmit={handleSubmit} className="flex-1 space-y-6">
-          <div className="space-y-4">
-            {/* Full Name */}
-            <div className="space-y-2">
-              <label className="text-slate-600 font-bold text-sm flex items-center gap-2">
-                <User className="w-4 h-4" /> Full Name
-              </label>
-              <input
-                type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-slate-700 font-medium"
-              />
-            </div>
+        {/* Right: Interactive Form */}
+        <div className="flex-1">
+           <form onSubmit={handleSubmit} className="h-full flex flex-col">
+              <AnimatePresence mode="wait">
+                 {step === 1 && (
+                    <motion.div 
+                      key="step1"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="space-y-8 flex-1"
+                    >
+                       <div className="p-8 bg-blue-50/50 rounded-[32px] border border-blue-100">
+                          <h3 className="text-lg font-black text-slate-800 mb-2">Who are you?</h3>
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Enter your professional name</p>
+                          <div className="relative group">
+                             <User className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors" />
+                             <input 
+                               type="text" 
+                               placeholder="Full Name" 
+                               value={fullName}
+                               onChange={(e) => setFullName(e.target.value)}
+                               required
+                               className="w-full pl-16 pr-8 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-bold text-slate-800 shadow-sm"
+                             />
+                          </div>
+                       </div>
+                    </motion.div>
+                 )}
 
-            {/* Vehicle Type Toggle */}
-            <div className="space-y-2">
-              <label className="text-slate-600 font-bold text-sm flex items-center gap-2">
-                <Car className="w-4 h-4" /> Vehicle Type
-              </label>
-              <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setVehicleType("car")}
-                  className={`py-3 rounded-xl font-bold transition-all ${vehicleType === "car" ? "bg-white shadow-md text-blue-600 ring-1 ring-slate-100" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                  Car
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setVehicleType("bike")}
-                  className={`py-3 rounded-xl font-bold transition-all ${vehicleType === "bike" ? "bg-white shadow-md text-blue-600 ring-1 ring-slate-100" : "text-slate-400 hover:text-slate-600"}`}
-                >
-                  Bike
-                </button>
+                 {step === 2 && (
+                    <motion.div 
+                      key="step2"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="space-y-8 flex-1"
+                    >
+                       <div className="space-y-6">
+                          <h3 className="text-lg font-black text-slate-800">Vehicle Registry</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                             <VehicleTab 
+                               active={vehicleType === 'car'} 
+                               onClick={() => setVehicleType('car')} 
+                               icon={Car} 
+                               label="Car" 
+                             />
+                             <VehicleTab 
+                               active={vehicleType === 'bike'} 
+                               onClick={() => setVehicleType('bike')} 
+                               icon={Bike} 
+                               label="Bike" 
+                             />
+                          </div>
+                          <div className="relative group p-8 bg-slate-50 border border-slate-100 rounded-[32px]">
+                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">License Plate</p>
+                             <input 
+                               type="text" 
+                               placeholder="KA 03 AA 1234" 
+                               value={regNo}
+                               onChange={(e) => setRegNo(e.target.value)}
+                               required
+                               className="w-full px-8 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-black text-2xl uppercase tracking-[0.2em] text-slate-800 text-center shadow-sm"
+                             />
+                          </div>
+                       </div>
+                    </motion.div>
+                 )}
+
+                 {step === 3 && (
+                    <motion.div 
+                      key="step3"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="space-y-8 flex-1"
+                    >
+                       <div className="text-center py-6 space-y-6">
+                          <div className="w-24 h-24 bg-emerald-50 rounded-[40px] flex items-center justify-center mx-auto shadow-2xl shadow-emerald-100">
+                             <ShieldCheck className="w-12 h-12 text-emerald-500" />
+                          </div>
+                          <div>
+                             <h3 className="text-2xl font-black text-slate-800 tracking-tight">Ready for Deployment</h3>
+                             <p className="text-slate-400 font-bold text-sm mt-2">Your node is cryptographically verified.</p>
+                          </div>
+                          <div className="p-6 bg-slate-50 border border-slate-100 rounded-[28px] text-left">
+                             <div className="flex items-center justify-between mb-2">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Operator</p>
+                                <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                             </div>
+                             <p className="text-sm font-black text-slate-800 tracking-tight mb-4">{fullName}</p>
+                             <div className="flex items-center justify-between mb-2">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification Node</p>
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                             </div>
+                             <p className="text-sm font-black text-slate-400 uppercase tracking-widest">DE-CENTRAL-BGL</p>
+                          </div>
+                       </div>
+                    </motion.div>
+                 )}
+              </AnimatePresence>
+
+              <div className="mt-auto flex gap-4 pt-10">
+                 {step > 1 && (
+                    <button 
+                      type="button"
+                      onClick={() => setStep(step - 1)}
+                      className="px-8 py-5 border border-slate-100 hover:bg-slate-50 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-400 transition-all font-sans"
+                    >
+                       Back
+                    </button>
+                 )}
+                 <button
+                   type="submit"
+                   disabled={loading}
+                   className="flex-1 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-2xl shadow-blue-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-xs uppercase tracking-widest group font-sans"
+                 >
+                   {loading ? (
+                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                   ) : (
+                     <>
+                       {step === 3 ? "Complete Deployment" : "Continue"}
+                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                     </>
+                   )}
+                 </button>
               </div>
-            </div>
-
-            {/* Registration Number */}
-            <div className="space-y-2">
-              <label className="text-slate-600 font-bold text-sm flex items-center gap-2">
-                <Hash className="w-4 h-4" /> Registration Number
-              </label>
-              <input
-                type="text"
-                placeholder="KA 03 AA 1234"
-                value={regNo}
-                onChange={(e) => setRegNo(e.target.value)}
-                required
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all text-slate-700 font-bold placeholder:font-normal uppercase tracking-widest"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group"
-          >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <>
-                Let's Go
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
-          </button>
-        </form>
+           </form>
+        </div>
       </motion.div>
     </div>
   );
+}
+
+function StepIndicator({ num, label, active, done }: any) {
+   return (
+      <div className="flex items-center gap-5 group">
+         <div className={`w-8 h-8 rounded-xl flex items-center justify-center border-2 transition-all duration-500 ${
+            done ? 'bg-emerald-500 border-emerald-500 text-white' : 
+            active ? 'bg-blue-600 border-blue-600 text-white scale-110' : 
+            'bg-white border-slate-100 text-slate-300'
+         }`}>
+            {done ? <CheckCircle2 className="w-4 h-4" /> : <span className="text-[10px] font-black">{num}</span>}
+         </div>
+         <p className={`text-xs font-black uppercase tracking-widest transition-colors duration-500 ${
+            done ? 'text-emerald-500' : active ? 'text-blue-600' : 'text-slate-300'
+         }`}>{label}</p>
+      </div>
+   )
+}
+
+function VehicleTab({ active, onClick, icon: Icon, label }: any) {
+   return (
+      <button 
+        type="button"
+        onClick={onClick}
+        className={`p-6 rounded-[28px] border-2 transition-all flex flex-col items-center gap-3 ${
+           active ? 'border-blue-600 bg-blue-50/50' : 'border-slate-50 hover:border-slate-100 bg-slate-50/50'
+        }`}
+      >
+         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+            active ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' : 'bg-white border border-slate-100 text-slate-300'
+         }`}>
+            <Icon className="w-6 h-6" />
+         </div>
+         <span className={`text-[10px] font-black uppercase tracking-widest ${active ? 'text-blue-600' : 'text-slate-400'}`}>{label}</span>
+      </button>
+   )
 }
