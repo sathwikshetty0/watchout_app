@@ -7,17 +7,17 @@ import Sidebar from "@/components/Sidebar";
 import Overview from "@/components/Overview";
 import LiveView from "@/components/LiveView";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, CreditCard, ShieldCheck, TrendingUp, Loader2 } from "lucide-react";
+import { Bell, CreditCard, ShieldCheck, TrendingUp, Loader2, Plus, Download, Shield, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState({
-    totalEarned: 0,
-    verifiedViolations: 0,
-    pendingVerifications: 0,
-    systemHealth: 98 // Simulated on-device health
+    totalEarned: 1250,
+    verifiedViolations: 42,
+    pendingVerifications: 8,
+    systemHealth: 99
   });
 
   useEffect(() => {
@@ -26,35 +26,22 @@ export default function HomePage() {
         router.push("/login");
       } else {
         setUser(user);
-        fetchStats(user.id);
         setLoading(false);
       }
     });
   }, [router]);
 
-  const fetchStats = async (userId: string) => {
-    // 1. Fetch total earned (sum of rewards from verified violations)
-    // 2. Fetch violation counts
-    // For now, simulating Supabase response if tables aren't yet populated
-    setStats({
-      totalEarned: 1250,
-      verifiedViolations: 42,
-      pendingVerifications: 8,
-      systemHealth: 99
-    });
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50 gap-4">
         <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
-        <p className="font-extrabold text-slate-400 uppercase tracking-widest text-sm">Authenticating...</p>
+        <p className="font-extrabold text-slate-400 uppercase tracking-widest text-sm font-sans">Authenticating...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[#fafbfc]">
+    <div className="flex h-screen bg-[#fafbfc] font-sans">
       <Sidebar />
       <main className="flex-1 ml-80 overflow-y-auto px-12 py-10">
         {/* Header */}
@@ -115,13 +102,13 @@ export default function HomePage() {
             />
           </div>
 
-          {/* Main Area: Live View & Recent Activity */}
+          {/* Main Area: Live View & Activity */}
           <div className="col-span-8 flex flex-col gap-10">
              <LiveView />
              <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden">
                 <div className="p-8 border-b border-slate-50 flex items-center justify-between">
                    <div>
-                      <h3 className="text-xl font-black text-slate-800 tracking-tight">System Activity</h3>
+                      <h3 className="text-xl font-black text-slate-800 tracking-tight">Recent Activity Log</h3>
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Violation Ledger</p>
                    </div>
                    <div className="flex gap-2">
@@ -133,35 +120,61 @@ export default function HomePage() {
              </div>
           </div>
 
-          <div className="col-span-4 flex flex-col gap-10">
-            {/* Rewards Card (Simplified Summary) */}
-            <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl shadow-slate-200">
-               <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-lg font-black tracking-tight">Active Rewards</h3>
-                  <TrendingUp className="w-5 h-5 text-green-400" />
-               </div>
-               <div className="space-y-6">
-                  <div className="pb-6 border-b border-white/5">
-                     <p className="text-[10px] uppercase font-black text-white/40 tracking-[0.2em] mb-2">Current Tier</p>
-                     <p className="text-2xl font-black">Elite Guardian</p>
-                  </div>
-                  <div>
-                     <p className="text-[10px] uppercase font-black text-white/40 tracking-[0.2em] mb-4">Payout Projection</p>
-                     <div className="flex items-end gap-2">
-                        <span className="text-4xl font-black text-blue-400">₹4,200</span>
-                        <span className="text-xs font-bold text-white/30 pb-1.5 whitespace-nowrap">Est. Apr 2026</span>
-                     </div>
-                  </div>
-               </div>
-               <button className="w-full mt-10 py-5 bg-white text-slate-900 font-extrabold rounded-2xl hover:bg-slate-100 transition-all text-sm uppercase tracking-wider">
-                  Withdraw to Bank
-               </button>
-            </div>
+          {/* Sidebar Area: Quick Actions & Rewards */}
+          <div className="col-span-4 space-y-10">
+             {/* Quick Actions */}
+             <div className="bg-white rounded-[40px] p-8 border border-slate-100 shadow-xl shadow-slate-100/50">
+                <h3 className="text-xl font-black text-slate-800 tracking-tight mb-8">Quick Actions</h3>
+                <div className="space-y-4">
+                   <DashAction icon={Plus} label="New Detection" desc="Manual entry for edge cases" />
+                   <DashAction icon={Download} label="Export Evidence" desc="Today's compliance vault" />
+                   <DashAction icon={Shield} label="Sync Node" desc="NXR-1194 connectivity" />
+                   <DashAction icon={ArrowRight} label="Request Payout" desc="Process available earnings" primary />
+                </div>
+             </div>
+
+             {/* System Integrity */}
+             <div className="bg-slate-900 rounded-[40px] p-10 text-white shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+                <div className="relative z-10">
+                   <h3 className="text-xl font-black tracking-tight mb-4">AI Integrity</h3>
+                   <p className="text-xs font-bold text-white/40 uppercase tracking-widest leading-relaxed mb-8">Your local processing node is running at optimal efficiency.</p>
+                   <div className="flex items-center justify-between mb-2">
+                      <span className="text-[10px] font-black uppercase text-white/30">NPU Load</span>
+                      <span className="text-xs font-black text-blue-400">92%</span>
+                   </div>
+                   <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: "92%" }}
+                        className="h-full bg-blue-500" 
+                      />
+                   </div>
+                </div>
+             </div>
           </div>
         </div>
       </main>
     </div>
   );
+}
+
+function DashAction({ icon: Icon, label, desc, primary }: any) {
+   return (
+      <button className={`w-full flex items-center gap-5 p-5 rounded-[28px] transition-all group ${
+         primary ? 'bg-slate-900 text-white shadow-xl shadow-slate-200' : 'bg-slate-50 hover:bg-slate-100'
+      }`}>
+         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all group-hover:scale-110 ${
+            primary ? 'bg-white/10 border-white/10 text-white' : 'bg-white border-slate-100 text-slate-400'
+         }`}>
+            <Icon className="w-5 h-5" />
+         </div>
+         <div className="text-left font-sans">
+            <p className="text-xs font-black uppercase tracking-widest leading-none mb-1">{label}</p>
+            <p className={`text-[10px] font-bold ${primary ? 'text-white/40' : 'text-slate-400'}`}>{desc}</p>
+         </div>
+      </button>
+   )
 }
 
 function StatCard({ label, value, icon: Icon, trend, color }: any) {
@@ -173,7 +186,7 @@ function StatCard({ label, value, icon: Icon, trend, color }: any) {
   };
 
   return (
-    <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-100 transition-all group">
+    <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-100 transition-all group font-sans">
       <div className={`w-12 h-12 ${colorMap[color]} rounded-2xl flex items-center justify-center border mb-6 group-hover:scale-110 transition-transform`}>
         <Icon className="w-6 h-6" />
       </div>
