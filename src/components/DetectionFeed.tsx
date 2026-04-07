@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Camera, Clock, MapPin, FileCheck, ChevronRight } from 'lucide-react';
+import { Camera, Clock, MapPin, FileCheck, ChevronRight, Filter, MoreVertical, ShieldAlert, History } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type ViolationType = 'Red Light Jump' | 'Wrong-Way' | 'No Helmet';
 
@@ -52,15 +53,6 @@ const detections: Detection[] = [
     hash: 'd54c7b19e280af43c7d9512e',
     status: 'Verified',
   },
-  {
-    id: 'DET-005',
-    type: 'No Helmet',
-    timestamp: '2026-04-06 12:58:03',
-    location: 'HSR Layout Sector 4',
-    plate: 'KA 04 GH 7890',
-    hash: 'e965f230d1b74ac8e3f08729',
-    status: 'Submitted',
-  },
 ];
 
 const typeBadge: Record<ViolationType, string> = {
@@ -70,114 +62,142 @@ const typeBadge: Record<ViolationType, string> = {
 };
 
 const statusBadge: Record<Detection['status'], string> = {
-  Verified: 'bg-emerald-50 text-emerald-600',
-  Submitted: 'bg-sky-50 text-sky-600',
-  Pending: 'bg-slate-100 text-slate-500',
+  Verified: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+  Submitted: 'bg-sky-50 text-sky-600 border border-sky-100',
+  Pending: 'bg-slate-50 text-slate-400 border border-slate-100',
 };
 
 export default function DetectionFeed() {
-  const [selected, setSelected] = useState<Detection | null>(null);
+  const [selected, setSelected] = useState<Detection | null>(detections[0]);
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Detection Feed</h1>
-        <p className="text-sm text-slate-400 mt-0.5">AI-flagged violations from your dashcam</p>
-      </div>
+    <div className="space-y-10">
+      <header className="flex items-center justify-between">
+         <div className="flex items-center gap-6">
+            <div className="w-16 h-16 bg-slate-900 rounded-[28px] flex items-center justify-center shadow-xl shadow-slate-200">
+               <History className="text-blue-400 w-8 h-8" />
+            </div>
+            <div>
+               <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">Detection Archive</h1>
+               <p className="text-slate-400 font-bold mt-1 uppercase tracking-[0.2em] text-[10px]">Cloud Vault • Edge Sync Active</p>
+            </div>
+         </div>
+         <div className="flex gap-4">
+            <button className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm text-slate-500 hover:text-slate-800 transition-all">
+               <Filter className="w-5 h-5" />
+            </button>
+            <button className="bg-slate-900 px-6 py-4 rounded-2xl text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-200 active:scale-95 transition-all">
+               Sync Dashcam
+            </button>
+         </div>
+      </header>
 
-      <div className="flex gap-4">
-        {/* Feed list */}
-        <div className="flex-1 bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-700">Recent Detections</p>
-            <span className="text-xs bg-sky-50 text-sky-600 px-2 py-0.5 rounded-full font-medium">
-              {detections.length} today
-            </span>
-          </div>
-          <ul className="divide-y divide-slate-50">
-            {detections.map((d) => (
-              <li
+      <div className="grid grid-cols-12 gap-10">
+        {/* Feed List */}
+        <div className="col-span-7 space-y-4">
+           {detections.map((d) => (
+              <motion.div
                 key={d.id}
                 onClick={() => setSelected(d)}
-                className={`flex items-center gap-3 px-5 py-4 cursor-pointer transition-colors ${
-                  selected?.id === d.id ? 'bg-sky-50' : 'hover:bg-slate-50'
+                whileHover={{ x: 10 }}
+                className={`p-6 rounded-[32px] border transition-all cursor-pointer flex items-center gap-6 ${
+                   selected?.id === d.id 
+                     ? 'bg-white border-blue-200 shadow-2xl shadow-blue-100/50' 
+                     : 'bg-white/50 border-slate-50 hover:bg-white hover:border-slate-100'
                 }`}
               >
-                <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                  <Camera className="w-4 h-4 text-slate-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${typeBadge[d.type]}`}>
-                      {d.type}
-                    </span>
-                    <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusBadge[d.status]}`}>
-                      {d.status}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 mt-1">
-                    <MapPin className="w-3 h-3 text-slate-300 shrink-0" />
-                    <span className="text-xs text-slate-500 truncate">{d.location}</span>
-                  </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="flex items-center gap-1 text-xs text-slate-400">
-                    <Clock className="w-3 h-3" />
-                    <span>{d.timestamp.slice(11)}</span>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-0.5">{d.plate}</p>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-300 shrink-0" />
-              </li>
-            ))}
-          </ul>
+                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
+                   selected?.id === d.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-110' : 'bg-slate-100 text-slate-400'
+                 }`}>
+                    <Camera className="w-7 h-7" />
+                 </div>
+                 <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                       <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${typeBadge[d.type]}`}>
+                          {d.type}
+                       </span>
+                       <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${statusBadge[d.status]}`}>
+                          {d.status}
+                       </span>
+                    </div>
+                    <p className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">{d.plate}</p>
+                    <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                       <MapPin className="w-3 h-3" /> {d.location}
+                    </p>
+                 </div>
+                 <div className="text-right">
+                    <p className="text-sm font-black text-slate-800 tracking-tight mb-1">{d.timestamp.split(' ')[1]}</p>
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{d.id}</p>
+                 </div>
+                 <ChevronRight className={`w-5 h-5 transition-colors ${selected?.id === d.id ? 'text-blue-600' : 'text-slate-200'}`} />
+              </motion.div>
+           ))}
         </div>
 
-        {/* Evidence panel */}
-        {selected && (
-          <div className="w-72 shrink-0 bg-white rounded-xl border border-slate-200 p-5 space-y-4 self-start">
-            <p className="text-sm font-semibold text-slate-800">Evidence View</p>
+        {/* Evidence Inspector */}
+        <div className="col-span-5">
+           <AnimatePresence mode="wait">
+              {selected && (
+                 <motion.div 
+                    key={selected.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="bg-slate-900 rounded-[40px] p-8 text-white shadow-2xl shadow-slate-300 flex flex-col gap-8 sticky top-12"
+                 >
+                    <div className="flex items-center justify-between">
+                       <h3 className="text-xl font-black tracking-tight">Evidence View</h3>
+                       <button className="text-white/40 hover:text-white transition-colors">
+                          <MoreVertical className="w-5 h-5" />
+                       </button>
+                    </div>
 
-            {/* Blurred thumbnail placeholder */}
-            <div className="relative rounded-lg overflow-hidden bg-slate-100 aspect-video flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300" />
-              <div className="absolute inset-0 backdrop-blur-sm" />
-              <div className="relative z-10 flex flex-col items-center gap-1.5">
-                <Camera className="w-6 h-6 text-slate-400" />
-                <p className="text-[11px] text-slate-500 font-medium">Face-blurred for privacy</p>
-              </div>
-            </div>
+                    {/* Image Mock */}
+                    <div className="aspect-video bg-white/5 rounded-[32px] border border-white/5 relative overflow-hidden group">
+                       <img 
+                         src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2069&auto=format&fit=crop" 
+                         className="w-full h-full object-cover blur-md opacity-40 group-hover:blur-sm transition-all duration-700"
+                         alt="Evidence"
+                       />
+                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                          <div className="bg-white/10 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
+                             <ShieldAlert className="w-8 h-8 text-blue-400" />
+                          </div>
+                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Anonymized Local Copy</p>
+                       </div>
+                    </div>
 
-            <div className="space-y-2.5 text-xs">
-              <Row label="Detection ID" value={selected.id} />
-              <Row label="Type" value={selected.type} />
-              <Row label="Timestamp" value={selected.timestamp} />
-              <Row label="Plate" value={selected.plate} />
-              <Row label="Location" value={selected.location} />
-              <div>
-                <p className="text-slate-400 mb-0.5">Evidence Hash</p>
-                <p className="font-mono text-slate-600 break-all bg-slate-50 px-2 py-1.5 rounded text-[10px]">
-                  {selected.hash}
-                </p>
-              </div>
-            </div>
+                    <div className="grid grid-cols-2 gap-6">
+                       <InspectorField label="Vault Node" value="BGL-CENTRAL" />
+                       <InspectorField label="AI Confidence" value="99.2%" color="text-emerald-400" />
+                       <InspectorField label="Device ID" value="NXR-194BF" />
+                       <InspectorField label="IPFS Link" value="QmX...9cA" mono />
+                    </div>
 
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg">
-              <FileCheck className="w-3.5 h-3.5 shrink-0" />
-              <span>BSA 2023 Sec 63 compliant</span>
-            </div>
-          </div>
-        )}
+                    <div className="p-6 bg-white/5 rounded-3xl border border-white/5">
+                       <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Cryptographic Proof</p>
+                       <p className="text-[10px] font-mono break-all text-blue-400 leading-relaxed font-bold">
+                          {selected.hash.repeat(2)}
+                       </p>
+                    </div>
+
+                    <button className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3">
+                       <FileCheck className="w-5 h-5" /> Export Compliance PDF
+                    </button>
+                 </motion.div>
+              )}
+           </AnimatePresence>
+        </div>
       </div>
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="text-slate-400">{label}</p>
-      <p className="text-slate-700 font-medium">{value}</p>
-    </div>
-  );
+function InspectorField({ label, value, mono, color }: any) {
+   return (
+      <div>
+         <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">{label}</p>
+         <p className={`text-sm font-black tracking-tight ${mono ? 'font-mono uppercase' : ''} ${color || 'text-white/90'}`}>{value}</p>
+      </div>
+   )
 }
