@@ -36,117 +36,99 @@ const violationColors: Record<string, string> = {
 
 export default function Overview() {
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Overview</h1>
-        <p className="text-sm text-slate-400 mt-0.5">Live dashboard — last updated just now</p>
-      </div>
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard
-          icon={<IndianRupee className="w-4 h-4 text-sky-500" />}
-          label="Total Earned"
-          value="₹6,160"
-          sub="+₹1,120 today"
-          subColor="text-emerald-500"
-        />
-        <StatCard
-          icon={<ShieldCheck className="w-4 h-4 text-sky-500" />}
-          label="Violations Verified"
-          value="38"
-          sub="4 pending review"
-          subColor="text-amber-500"
-        />
-        <StatCard
-          icon={<Cpu className="w-4 h-4 text-sky-500" />}
-          label="System Health"
-          value="Optimal"
-          sub="Camera • GPS • AI active"
-          subColor="text-emerald-500"
-        />
-      </div>
-
+    <div className="p-8 space-y-10">
       {/* Earnings Chart */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-slate-50/50 rounded-[24px] border border-slate-100 p-8 hover:bg-slate-50 transition-colors group">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <p className="text-sm font-medium text-slate-700">Weekly Earnings</p>
-            <p className="text-xs text-slate-400">This week vs last week</p>
+            <p className="text-xs font-black uppercase text-slate-400 tracking-[0.15em] mb-1">Weekly Payout Performance</p>
+            <p className="text-2xl font-black text-slate-800 tracking-tight flex items-baseline gap-2">
+               ₹6,160 
+               <span className="text-[10px] font-black text-green-500 bg-green-50 px-2 py-0.5 rounded-full">+18.5%</span>
+            </p>
           </div>
-          <TrendingUp className="w-4 h-4 text-emerald-500" />
+          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-slate-100 group-hover:scale-110 transition-transform">
+             <TrendingUp className="w-6 h-6 text-blue-500" />
+          </div>
         </div>
-        <ResponsiveContainer width="100%" height={180}>
-          <AreaChart data={earningsData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+        <ResponsiveContainer width="100%" height={240}>
+          <AreaChart data={earningsData} margin={{ top: 20, right: 0, bottom: 0, left: -20 }}>
             <defs>
               <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1} />
+                <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="6 6" stroke="#e2e8f0" vertical={false} />
+            <XAxis 
+              dataKey="day" 
+              tick={{ fontSize: 10, fill: '#64748b', fontWeight: 900 }} 
+              axisLine={false} 
+              tickLine={false}
+              dy={15}
+            />
+            <YAxis 
+              tick={{ fontSize: 10, fill: '#64748b', fontWeight: 900 }} 
+              axisLine={false} 
+              tickLine={false}
+              dx={-10}
+            />
             <Tooltip
-              contentStyle={{ border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+              contentStyle={{ 
+                border: 'none', 
+                borderRadius: 20, 
+                fontSize: 12, 
+                boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)',
+                padding: '16px',
+                fontWeight: 800,
+                color: '#1e293b'
+              }}
               formatter={(v) => [`₹${v}`, 'Earned']}
+              cursor={{ stroke: '#2563eb', strokeWidth: 2, strokeDasharray: '4 4' }}
             />
             <Area
               type="monotone"
               dataKey="amount"
-              stroke="#0ea5e9"
-              strokeWidth={2}
+              stroke="#2563eb"
+              strokeWidth={4}
               fill="url(#earningsGradient)"
-              dot={false}
-              activeDot={{ r: 4, strokeWidth: 0, fill: '#0ea5e9' }}
+              dot={{ r: 4, strokeWidth: 0, fill: '#2563eb' }}
+              activeDot={{ r: 6, strokeWidth: 0, fill: '#000' }}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-white rounded-xl border border-slate-200">
-        <div className="px-5 py-4 border-b border-slate-100">
-          <p className="text-sm font-medium text-slate-700">Recent Activity</p>
+      {/* Recent Activity Ledger */}
+      <div>
+        <div className="flex items-center justify-between mb-6">
+           <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Latest Proofs Generated</h4>
+           <button className="text-xs font-black text-blue-600 hover:text-blue-700 transition-colors uppercase tracking-widest px-4 py-2 border border-blue-100 rounded-xl hover:bg-blue-50">Filter Results</button>
         </div>
-        <ul className="divide-y divide-slate-50">
+        <div className="space-y-4">
           {recentActivity.map((item) => (
-            <li key={item.id} className="flex items-center gap-3 px-5 py-3.5">
-              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${violationColors[item.type] ?? 'bg-slate-100 text-slate-500'}`}>
-                {item.type}
-              </span>
-              <span className="text-sm text-slate-600 flex-1 truncate">{item.location}</span>
-              <span className="text-xs text-slate-400 shrink-0">{item.time}</span>
-              <span className="text-sm font-medium text-emerald-600 shrink-0">+₹{item.reward}</span>
-            </li>
+            <div key={item.id} className="flex items-center gap-6 p-6 rounded-[24px] border border-slate-50 hover:bg-slate-50 transition-all hover:border-slate-100 group">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all group-hover:rotate-6 ${violationColors[item.type] ?? 'bg-slate-100 text-slate-500'} bg-opacity-20`}>
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-1">
+                   <p className="text-sm font-black text-slate-800 tracking-tight">{item.type}</p>
+                   <span className="w-1 h-1 rounded-full bg-slate-300" />
+                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.time}</span>
+                </div>
+                <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                   <span className="truncate max-w-[200px]">{item.location}</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-black text-emerald-600">+ ₹{item.reward}</p>
+                <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-1">Status: Verified</p>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  sub,
-  subColor,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  sub: string;
-  subColor: string;
-}) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-        <div className="w-7 h-7 rounded-lg bg-sky-50 flex items-center justify-center">{icon}</div>
-      </div>
-      <p className="text-2xl font-semibold text-slate-900">{value}</p>
-      <p className={`text-xs font-medium ${subColor}`}>{sub}</p>
     </div>
   );
 }

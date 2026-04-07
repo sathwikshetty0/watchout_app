@@ -118,6 +118,19 @@ export default function HomePage() {
           {/* Main Area: Live View & Recent Activity */}
           <div className="col-span-8 flex flex-col gap-10">
              <LiveView />
+             <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden">
+                <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                   <div>
+                      <h3 className="text-xl font-black text-slate-800 tracking-tight">System Activity</h3>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Real-time Violation Ledger</p>
+                   </div>
+                   <div className="flex gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Live Sync</span>
+                   </div>
+                </div>
+                <Overview />
+             </div>
           </div>
 
           <div className="col-span-4 flex flex-col gap-10">
