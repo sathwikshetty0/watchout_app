@@ -1,6 +1,7 @@
 'use client';
 
-import { ShieldCheck, Download, Hash, Clock, FileCheck } from 'lucide-react';
+import { ShieldCheck, Download, Hash, Clock, FileCheck, CheckCircle2, AlertCircle, ExternalLink, Scale } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface Certificate {
   id: string;
@@ -47,104 +48,133 @@ const certificates: Certificate[] = [
 ];
 
 const violationColors: Record<string, string> = {
-  'Red Light Jump': 'bg-red-50 text-red-600',
-  'No Helmet': 'bg-amber-50 text-amber-600',
-  'Wrong-Way': 'bg-orange-50 text-orange-600',
+  'Red Light Jump': 'bg-red-50 text-red-600 border-red-100',
+  'No Helmet': 'bg-amber-50 text-amber-600 border-amber-100',
+  'Wrong-Way': 'bg-orange-50 text-orange-600 border-orange-100',
 };
 
 export default function ComplianceLog() {
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-slate-900">Legal Compliance</h1>
-        <p className="text-sm text-slate-400 mt-0.5">
-          Evidence certificates generated under BSA 2023 Sec 63
-        </p>
-      </div>
+    <div className="space-y-12">
+      <header className="flex items-start justify-between">
+         <div className="space-y-4 max-w-2xl">
+            <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">Legal Compliance Log</h1>
+            <p className="text-slate-500 font-medium leading-relaxed">
+               Evidence certificates generated and vaulted under <strong>Bharatiya Sakshya Adhiniyam 2023, Section 63</strong>. 
+               All logs are cryptographically sealed at the time of detection.
+            </p>
+         </div>
+         <div className="bg-blue-600 p-8 rounded-[40px] text-white shadow-2xl flex flex-col items-center justify-center gap-2">
+            <Scale className="w-8 h-8 text-blue-200" />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">Legal Status</p>
+            <p className="text-lg font-black tracking-tight">Admissible</p>
+         </div>
+      </header>
 
-      {/* Info banner */}
-      <div className="flex items-start gap-3 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3.5">
-        <ShieldCheck className="w-4 h-4 text-sky-500 mt-0.5 shrink-0" />
-        <p className="text-xs text-sky-700 leading-relaxed">
-          Each certificate is SHA-256 hashed and digitally signed at the time of detection. This
-          evidence is admissible under the <strong>Bharatiya Sakshya Adhiniyam 2023, Section 63</strong>.
-        </p>
-      </div>
+      <div className="grid grid-cols-12 gap-10">
+         {/* Main Log */}
+         <div className="col-span-8 space-y-6">
+            {certificates.map((cert, index) => (
+               <motion.div 
+                 key={cert.id}
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: index * 0.1 }}
+                 className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden group hover:border-blue-200 transition-all"
+               >
+                  <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                     <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100">
+                           <FileCheck className="w-6 h-6 text-blue-500" />
+                        </div>
+                        <div>
+                           <p className="text-sm font-black text-slate-800 tracking-tight">{cert.id}</p>
+                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Hash: {cert.sha256.slice(0, 12)}...</p>
+                        </div>
+                     </div>
+                     <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                        cert.status === 'Valid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-500 border border-amber-100'
+                     }`}>
+                        {cert.status} Evidence
+                     </span>
+                  </div>
 
-      {/* Certificate cards */}
-      <div className="space-y-4">
-        {certificates.map((cert) => (
-          <div key={cert.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-            {/* Card header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-sky-50 flex items-center justify-center">
-                  <FileCheck className="w-4 h-4 text-sky-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-800">{cert.id}</p>
-                  <p className="text-[11px] text-slate-400">Ref: {cert.detectionId}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${
-                    cert.status === 'Valid'
-                      ? 'bg-emerald-50 text-emerald-600'
-                      : 'bg-amber-50 text-amber-500'
-                  }`}
-                >
-                  {cert.status}
-                </span>
-                {cert.status === 'Valid' && (
-                  <button className="flex items-center gap-1 text-[11px] text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg px-2.5 py-1 transition-colors">
-                    <Download className="w-3 h-3" />
-                    Export
-                  </button>
-                )}
-              </div>
+                  <div className="p-8 grid grid-cols-2 gap-10">
+                     <div className="space-y-6">
+                        <Field label="Violation Category" value={cert.violation} badge={violationColors[cert.violation]} />
+                        <Field label="Vehicle Registration" value={cert.plate} mono />
+                        <Field label="Cloud Signature" value={cert.signature} mono truncate />
+                     </div>
+                     <div className="space-y-6">
+                        <Field label="Vault Timestamp" value={cert.issuedAt} />
+                        <Field label="Authority Check" value={cert.status === 'Valid' ? 'Verified by Traffic Police' : 'Awaiting Review'} color={cert.status === 'Valid' ? 'text-emerald-500' : 'text-amber-500'} />
+                        <div className="pt-4 flex gap-3">
+                           <button className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+                              <Download className="w-4 h-4" /> Export Evidence
+                           </button>
+                           <button className="w-12 h-12 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-all">
+                              <ExternalLink className="w-4 h-4" />
+                           </button>
+                        </div>
+                     </div>
+                  </div>
+               </motion.div>
+            ))}
+         </div>
+
+         {/* Side Info */}
+         <div className="col-span-4 space-y-6">
+            <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl -mr-16 -mt-16" />
+               <h4 className="text-lg font-black tracking-tight mb-4 flex items-center gap-2">
+                  <Scale className="text-blue-400 w-5 h-5" /> Evidence Protocol
+               </h4>
+               <p className="text-xs font-bold text-white/50 leading-relaxed mb-6">
+                  The dashcam generates on-chip cryptographic signatures using <strong>ECC-P256</strong>. These are immutable and time-stamped via a decentralized NTP server.
+               </p>
+               <div className="space-y-3">
+                  <StatusStep label="Local Hash Generation" active />
+                  <StatusStep label="Authority Handshake" active />
+                  <StatusStep label="Evidence Vaulting" active />
+                  <StatusStep label="Legal Accessibility" />
+               </div>
             </div>
 
-            {/* Card body */}
-            <div className="px-5 py-4 grid grid-cols-2 gap-x-6 gap-y-3 text-xs">
-              <Field label="Violation Type">
-                <span className={`px-2 py-0.5 rounded-full font-medium ${violationColors[cert.violation] ?? 'bg-slate-100 text-slate-500'}`}>
-                  {cert.violation}
-                </span>
-              </Field>
-              <Field label="Vehicle Plate">
-                <span className="font-mono text-slate-700">{cert.plate}</span>
-              </Field>
-              <Field label="Issued At">
-                <span className="flex items-center gap-1 text-slate-600">
-                  <Clock className="w-3 h-3 text-slate-300" />
-                  {cert.issuedAt}
-                </span>
-              </Field>
-              <Field label="Digital Signature">
-                <span className="font-mono text-slate-500 truncate">{cert.signature}</span>
-              </Field>
-              <div className="col-span-2">
-                <p className="text-slate-400 mb-1 flex items-center gap-1">
-                  <Hash className="w-3 h-3" /> SHA-256 Hash
-                </p>
-                <p className="font-mono text-[10px] text-slate-600 bg-slate-50 rounded-lg px-3 py-2 break-all border border-slate-100">
-                  {cert.sha256}
-                </p>
-              </div>
+            <div className="bg-amber-50 border border-amber-100 rounded-[32px] p-8 group hover:bg-amber-100 transition-colors">
+               <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-amber-200">
+                  <ShieldCheck className="text-white w-6 h-6" />
+               </div>
+               <h4 className="text-lg font-black text-amber-900 tracking-tight mb-2">Notice of Admissibility</h4>
+               <p className="text-xs font-bold text-amber-700/70 leading-relaxed">
+                  Certificate generation is compliant with the updated standards as of <strong>July 2024</strong>. Check legal documentation for local district nuances.
+               </p>
             </div>
-          </div>
-        ))}
+         </div>
       </div>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, value, badge, mono, color, truncate }: any) {
   return (
     <div>
-      <p className="text-slate-400 mb-0.5">{label}</p>
-      <div className="text-slate-700">{children}</div>
+       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{label}</p>
+       {badge ? (
+         <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${badge}`}>{value}</span>
+       ) : (
+         <p className={`text-sm font-black tracking-tight ${mono ? 'font-mono uppercase' : ''} ${color || 'text-slate-800'} ${truncate ? 'truncate max-w-[150px]' : ''}`}>
+            {value}
+         </p>
+       )}
     </div>
-  );
+  )
+}
+
+function StatusStep({ label, active }: any) {
+   return (
+      <div className="flex items-center gap-3">
+         <div className={`w-2 h-2 rounded-full ${active ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]' : 'bg-white/10'}`} />
+         <span className={`text-[10px] font-black uppercase tracking-widest ${active ? 'text-white' : 'text-white/20'}`}>{label}</span>
+      </div>
+   )
 }
