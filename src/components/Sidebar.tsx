@@ -86,10 +86,10 @@ export default function Sidebar() {
                <p className="text-[10px] font-black uppercase text-white/40 tracking-widest">Device Status</p>
                <Wifi className="w-4 h-4 text-blue-400" />
             </div>
-            <p className="text-lg font-black mb-1">Nexar Pro AI</p>
-            <p className="text-[11px] font-bold text-green-400 flex items-center gap-2">
-               <span className="w-2 h-2 rounded-full bg-green-400" />
-               Streaming via WebRTC
+            <p className="text-lg font-black mb-1">Linked Device</p>
+            <p className="text-[11px] font-bold text-slate-400 flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-slate-400" />
+               Initializing Link...
             </p>
          </div>
       </div>

@@ -24,7 +24,7 @@ export default function SettingsPage() {
         <header className="flex items-center justify-between mb-12">
           <div>
             <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">System Settings</h1>
-            <p className="text-slate-400 font-bold mt-1 uppercase tracking-[0.2em] text-[10px]">Node Configuration • VXR-9921</p>
+            <p className="text-slate-400 font-bold mt-1 uppercase tracking-[0.2em] text-[10px]">Node Configuration • ---</p>
           </div>
           <button 
             onClick={handleSave}
@@ -49,8 +49,8 @@ export default function SettingsPage() {
                         <Car className="text-blue-400 w-10 h-10" />
                      </div>
                      <div>
-                        <p className="text-2xl font-black text-slate-800 tracking-tight">Tesla Model 3</p>
-                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Reg: KA 01 AB 1234 • Blue Metallic</p>
+                        <p className="text-2xl font-black text-slate-800 tracking-tight">Not Configured</p>
+                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Connect your vehicle registry</p>
                      </div>
                   </div>
                   <button className="px-6 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">Edit Registry</button>
@@ -93,11 +93,11 @@ export default function SettingsPage() {
                <Globe className="w-8 h-8 text-blue-200 mb-6" />
                <h4 className="text-xl font-black tracking-tight mb-2">Cloud Connectivity</h4>
                <p className="text-xs font-bold text-blue-100/60 leading-relaxed mb-6">
-                  Your node is currently synced with the <strong>Bengaluru South Edge Cluster</strong>.
+                  Your node is currently synced with the <strong>Global Edge Cluster</strong>.
                </p>
                <div className="flex items-center gap-3 p-4 bg-white/10 rounded-2xl border border-white/5">
                   <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Node ID: WCH-1194-BF</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">Node ID: ---</span>
                </div>
             </div>
 

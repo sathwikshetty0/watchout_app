@@ -16,44 +16,8 @@ interface Detection {
   status: 'Submitted' | 'Verified' | 'Pending';
 }
 
-const detections: Detection[] = [
-  {
-    id: 'DET-001',
-    type: 'Red Light Jump',
-    timestamp: '2026-04-06 14:32:07',
-    location: 'MG Road Signal, Bengaluru',
-    plate: 'KA 01 AB 1234',
-    hash: 'a3f9c2e1b7d804f65c291ae3',
-    status: 'Verified',
-  },
-  {
-    id: 'DET-002',
-    type: 'No Helmet',
-    timestamp: '2026-04-06 14:14:51',
-    location: 'Koramangala 5th Block',
-    plate: 'KA 03 MN 5678',
-    hash: 'b72e1d034ca8f921e6b5047d',
-    status: 'Submitted',
-  },
-  {
-    id: 'DET-003',
-    type: 'Wrong-Way',
-    timestamp: '2026-04-06 13:51:20',
-    location: 'Indiranagar 100ft Rd',
-    plate: 'KA 05 XY 9012',
-    hash: 'c18a4f72b39d05e7a2cf631b',
-    status: 'Pending',
-  },
-  {
-    id: 'DET-004',
-    type: 'Red Light Jump',
-    timestamp: '2026-04-06 13:32:44',
-    location: 'Whitefield Main Rd',
-    plate: 'KA 02 CD 3456',
-    hash: 'd54c7b19e280af43c7d9512e',
-    status: 'Verified',
-  },
-];
+// Data will be fetched from Supabase
+const detections: Detection[] = [];
 
 const typeBadge: Record<ViolationType, string> = {
   'Red Light Jump': 'bg-red-50 text-red-600 border border-red-100',
@@ -68,7 +32,8 @@ const statusBadge: Record<Detection['status'], string> = {
 };
 
 export default function DetectionFeed() {
-  const [selected, setSelected] = useState<Detection | null>(detections[0]);
+  const [selected, setSelected] = useState<Detection | null>(null);
+
 
   return (
     <div className="space-y-10">
@@ -95,44 +60,53 @@ export default function DetectionFeed() {
       <div className="grid grid-cols-12 gap-10">
         {/* Feed List */}
         <div className="col-span-7 space-y-4">
-           {detections.map((d) => (
-              <motion.div
-                key={d.id}
-                onClick={() => setSelected(d)}
-                whileHover={{ x: 10 }}
-                className={`p-6 rounded-[32px] border transition-all cursor-pointer flex items-center gap-6 ${
-                   selected?.id === d.id 
-                     ? 'bg-white border-blue-200 shadow-2xl shadow-blue-100/50' 
-                     : 'bg-white/50 border-slate-50 hover:bg-white hover:border-slate-100'
-                }`}
-              >
-                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
-                   selected?.id === d.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-110' : 'bg-slate-100 text-slate-400'
-                 }`}>
-                    <Camera className="w-7 h-7" />
-                 </div>
-                 <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                       <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${typeBadge[d.type]}`}>
-                          {d.type}
-                       </span>
-                       <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${statusBadge[d.status]}`}>
-                          {d.status}
-                       </span>
-                    </div>
-                    <p className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">{d.plate}</p>
-                    <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
-                       <MapPin className="w-3 h-3" /> {d.location}
-                    </p>
-                 </div>
-                 <div className="text-right">
-                    <p className="text-sm font-black text-slate-800 tracking-tight mb-1">{d.timestamp.split(' ')[1]}</p>
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{d.id}</p>
-                 </div>
-                 <ChevronRight className={`w-5 h-5 transition-colors ${selected?.id === d.id ? 'text-blue-600' : 'text-slate-200'}`} />
-              </motion.div>
-           ))}
+           {detections.length > 0 ? (
+             detections.map((d) => (
+               <motion.div
+                 key={d.id}
+                 onClick={() => setSelected(d)}
+                 whileHover={{ x: 10 }}
+                 className={`p-6 rounded-[32px] border transition-all cursor-pointer flex items-center gap-6 ${
+                    selected?.id === d.id 
+                      ? 'bg-white border-blue-200 shadow-2xl shadow-blue-100/50' 
+                      : 'bg-white/50 border-slate-50 hover:bg-white hover:border-slate-100'
+                 }`}
+               >
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${
+                    selected?.id === d.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 scale-110' : 'bg-slate-100 text-slate-400'
+                  }`}>
+                     <Camera className="w-7 h-7" />
+                  </div>
+                  <div className="flex-1">
+                     <div className="flex items-center gap-3 mb-2">
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${typeBadge[d.type]}`}>
+                           {d.type}
+                        </span>
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${statusBadge[d.status]}`}>
+                           {d.status}
+                        </span>
+                     </div>
+                     <p className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">{d.plate}</p>
+                     <p className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                        <MapPin className="w-3 h-3" /> {d.location}
+                     </p>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-sm font-black text-slate-800 tracking-tight mb-1">{d.timestamp.split(' ')[1]}</p>
+                     <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{d.id}</p>
+                  </div>
+                  <ChevronRight className={`w-5 h-5 transition-colors ${selected?.id === d.id ? 'text-blue-600' : 'text-slate-200'}`} />
+               </motion.div>
+            ))
+           ) : (
+             <div className="p-20 text-center bg-white/50 rounded-[40px] border border-dashed border-slate-200">
+                <Camera className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No detections captured yet</p>
+                <p className="text-[10px] font-bold text-slate-300 mt-2">Connect your dashcam to start sync</p>
+             </div>
+           )}
         </div>
+
 
         {/* Evidence Inspector */}
         <div className="col-span-5">
@@ -152,20 +126,14 @@ export default function DetectionFeed() {
                        </button>
                     </div>
 
-                    {/* Image Mock */}
-                    <div className="aspect-video bg-white/5 rounded-[32px] border border-white/5 relative overflow-hidden group">
-                       <img 
-                         src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2069&auto=format&fit=crop" 
-                         className="w-full h-full object-cover blur-md opacity-40 group-hover:blur-sm transition-all duration-700"
-                         alt="Evidence"
-                       />
-                       <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                          <div className="bg-white/10 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
-                             <ShieldAlert className="w-8 h-8 text-blue-400" />
-                          </div>
-                          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Anonymized Local Copy</p>
-                       </div>
+                    {/* Evidence Image Holder */}
+                    <div className="aspect-video bg-white/5 rounded-[32px] border border-white/5 relative overflow-hidden group flex flex-col items-center justify-center gap-3">
+                        <div className="bg-white/10 backdrop-blur-xl p-4 rounded-2xl border border-white/10">
+                           <ShieldAlert className="w-8 h-8 text-blue-400" />
+                        </div>
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Waiting for Evidence Uplink</p>
                     </div>
+
 
                     <div className="grid grid-cols-2 gap-6">
                        <InspectorField label="Vault Node" value="BGL-CENTRAL" />

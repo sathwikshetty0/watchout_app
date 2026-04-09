@@ -14,38 +14,9 @@ interface Certificate {
   status: 'Valid' | 'Pending';
 }
 
-const certificates: Certificate[] = [
-  {
-    id: 'CERT-20260406-001',
-    detectionId: 'DET-001',
-    violation: 'Red Light Jump',
-    issuedAt: '2026-04-06 14:33:02',
-    plate: 'KA 01 AB 1234',
-    sha256: '3a7f2e9c1b4d806f5c291ae3b72e1d034ca8f921e6b5047da3f9c2e1b7d804f6',
-    signature: 'MEUCIQDkZ2x9...rT4bN==',
-    status: 'Valid',
-  },
-  {
-    id: 'CERT-20260406-002',
-    detectionId: 'DET-004',
-    violation: 'Red Light Jump',
-    issuedAt: '2026-04-06 13:33:15',
-    plate: 'KA 02 CD 3456',
-    sha256: 'd54c7b19e280af43c7d9512ec18a4f72b39d05e7a2cf631bb72e1d034ca8f921',
-    signature: 'MEQCIHpF8y1b...mX9cA==',
-    status: 'Valid',
-  },
-  {
-    id: 'CERT-20260406-003',
-    detectionId: 'DET-002',
-    violation: 'No Helmet',
-    issuedAt: '2026-04-06 14:15:30',
-    plate: 'KA 03 MN 5678',
-    sha256: 'b72e1d034ca8f921e6b5047da3f9c2e1b7d804f63a7f2e9c1b4d806f5c291ae3',
-    signature: '—',
-    status: 'Pending',
-  },
-];
+// Data will be fetched from Supabase
+const certificates: Certificate[] = [];
+
 
 const violationColors: Record<string, string> = {
   'Red Light Jump': 'bg-red-50 text-red-600 border-red-100',
@@ -74,52 +45,61 @@ export default function ComplianceLog() {
       <div className="grid grid-cols-12 gap-10">
          {/* Main Log */}
          <div className="col-span-8 space-y-6">
-            {certificates.map((cert, index) => (
-               <motion.div 
-                 key={cert.id}
-                 initial={{ opacity: 0, y: 20 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 transition={{ delay: index * 0.1 }}
-                 className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden group hover:border-blue-200 transition-all"
-               >
-                  <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100">
-                           <FileCheck className="w-6 h-6 text-blue-500" />
-                        </div>
-                        <div>
-                           <p className="text-sm font-black text-slate-800 tracking-tight">{cert.id}</p>
-                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Hash: {cert.sha256.slice(0, 12)}...</p>
-                        </div>
-                     </div>
-                     <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
-                        cert.status === 'Valid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-500 border border-amber-100'
-                     }`}>
-                        {cert.status} Evidence
-                     </span>
-                  </div>
+            {certificates.length > 0 ? (
+              certificates.map((cert, index) => (
+                <motion.div 
+                  key={cert.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden group hover:border-blue-200 transition-all"
+                >
+                   <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                      <div className="flex items-center gap-4">
+                         <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm border border-slate-100">
+                            <FileCheck className="w-6 h-6 text-blue-500" />
+                         </div>
+                         <div>
+                            <p className="text-sm font-black text-slate-800 tracking-tight">{cert.id}</p>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Hash: {cert.sha256.slice(0, 12)}...</p>
+                         </div>
+                      </div>
+                      <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${
+                         cert.status === 'Valid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-500 border border-amber-100'
+                      }`}>
+                         {cert.status} Evidence
+                      </span>
+                   </div>
 
-                  <div className="p-8 grid grid-cols-2 gap-10">
-                     <div className="space-y-6">
-                        <Field label="Violation Category" value={cert.violation} badge={violationColors[cert.violation]} />
-                        <Field label="Vehicle Registration" value={cert.plate} mono />
-                        <Field label="Cloud Signature" value={cert.signature} mono truncate />
-                     </div>
-                     <div className="space-y-6">
-                        <Field label="Vault Timestamp" value={cert.issuedAt} />
-                        <Field label="Authority Check" value={cert.status === 'Valid' ? 'Verified by Traffic Police' : 'Awaiting Review'} color={cert.status === 'Valid' ? 'text-emerald-500' : 'text-amber-500'} />
-                        <div className="pt-4 flex gap-3">
-                           <button className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
-                              <Download className="w-4 h-4" /> Export Evidence
-                           </button>
-                           <button className="w-12 h-12 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-all">
-                              <ExternalLink className="w-4 h-4" />
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-               </motion.div>
-            ))}
+                   <div className="p-8 grid grid-cols-2 gap-10">
+                      <div className="space-y-6">
+                         <Field label="Violation Category" value={cert.violation} badge={violationColors[cert.violation]} />
+                         <Field label="Vehicle Registration" value={cert.plate} mono />
+                         <Field label="Cloud Signature" value={cert.signature} mono truncate />
+                      </div>
+                      <div className="space-y-6">
+                         <Field label="Vault Timestamp" value={cert.issuedAt} />
+                         <Field label="Authority Check" value={cert.status === 'Valid' ? 'Verified by Traffic Police' : 'Awaiting Review'} color={cert.status === 'Valid' ? 'text-emerald-500' : 'text-amber-500'} />
+                         <div className="pt-4 flex gap-3">
+                            <button className="flex-1 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+                               <Download className="w-4 h-4" /> Export Evidence
+                            </button>
+                            <button className="w-12 h-12 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-all">
+                               <ExternalLink className="w-4 h-4" />
+                            </button>
+                         </div>
+                      </div>
+                   </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="p-20 text-center bg-white rounded-[40px] border border-dashed border-slate-200">
+                 <ShieldCheck className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                 <p className="text-xs font-black text-slate-400 uppercase tracking-widest">No compliance logs generated</p>
+                 <p className="text-[10px] font-bold text-slate-300 mt-2">Detections must be verified before log generation</p>
+              </div>
+            )}
+
          </div>
 
          {/* Side Info */}

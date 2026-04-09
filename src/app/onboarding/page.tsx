@@ -209,7 +209,7 @@ export default function OnboardingPage() {
                                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification Node</p>
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                              </div>
-                             <p className="text-sm font-black text-slate-400 uppercase tracking-widest">DE-CENTRAL-BGL</p>
+                             <p className="text-sm font-black text-slate-400 uppercase tracking-widest">GLOBAL-DEPLOYMENT</p>
                           </div>
                        </div>
                     </motion.div>

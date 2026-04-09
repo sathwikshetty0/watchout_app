@@ -14,10 +14,10 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [stats, setStats] = useState({
-    totalEarned: 1250,
-    verifiedViolations: 42,
-    pendingVerifications: 8,
-    systemHealth: 99
+    totalEarned: 0,
+    verifiedViolations: 0,
+    pendingVerifications: 0,
+    systemHealth: 0
   });
 
   useEffect(() => {
@@ -61,8 +61,8 @@ export default function HomePage() {
             <div className="h-14 w-[1px] bg-slate-100" />
             <div className="text-right">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Session ID</p>
-                <code className="text-xs font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg tracking-widest">
-                  WCH-194-BF9
+                <code className="text-xs font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg tracking-widest">
+                  PENDING
                 </code>
             </div>
           </div>

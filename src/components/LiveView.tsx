@@ -26,48 +26,16 @@ export default function LiveView() {
   const [reportSuccess, setReportSuccess] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Simulation: Dynamic Detections
+  // Connect to dashcam via WebRTC or Supabase Realtime
   useEffect(() => {
     if (status !== "live") {
       setDetections([]);
       return;
     }
-
-    const interval = setInterval(() => {
-      const mockDetections: Detection[] = [
-        {
-          id: "1",
-          type: "Vehicle",
-          plate: "KA 03 AA 1234",
-          x: 30 + Math.random() * 5,
-          y: 40 + Math.random() * 5,
-          width: 30,
-          height: 25,
-        },
-        {
-          id: "2",
-          type: "Bike",
-          plate: "KA 05 MN 9988",
-          x: 60 + Math.random() * 5,
-          y: 50 + Math.random() * 5,
-          width: 15,
-          height: 20,
-          isViolation: Math.random() > 0.8,
-        }
-      ];
-      setDetections(mockDetections);
-      
-      // Update telemetry
-      setTelemetry(prev => ({
-        ...prev,
-        speed: 40 + Math.floor(Math.random() * 15),
-        lat: prev.lat + (Math.random() - 0.5) * 0.0001,
-        lng: prev.lng + (Math.random() - 0.5) * 0.0001,
-      }));
-    }, 1500);
-
-    return () => clearInterval(interval);
+    
+    // TODO: Implement real-time detection subscription
   }, [status]);
+
 
   const toggleStream = async () => {
     if (isStreaming) {
@@ -211,13 +179,14 @@ export default function LiveView() {
                  </button>
               </div>
               
-              {/* Simulated Feed */}
-              <img 
-                src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=2069&auto=format&fit=crop" 
-                className="w-full h-full object-cover opacity-60 transition-all duration-1000"
-                style={{ filter: telemetry.speed > 55 ? 'contrast(1.5) saturate(1.2)' : 'none' }}
-                alt="Live Traffic"
-              />
+              {/* Live Feed Placeholder */}
+              <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                 <div className="flex flex-col items-center gap-4 opacity-20">
+                    <Loader2 className="w-12 h-12 animate-spin text-blue-400" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Stream Initializing</p>
+                 </div>
+              </div>
+
               
               {/* Overlay: AI Processing Simulation */}
               <div className="absolute inset-0 pointer-events-none">
