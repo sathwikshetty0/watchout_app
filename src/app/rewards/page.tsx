@@ -5,28 +5,28 @@ import { Wallet, ArrowUpRight, ArrowDownLeft, Clock, CheckCircle2, AlertCircle, 
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from '@/components/Sidebar';
 
-const transactions = [
-  { id: 'TXN-001', type: 'Reward', description: 'Red Light Jump • KA 01 AB 1234', amount: 150, date: 'Apr 06, 14:33', status: 'Verified', method: 'AI Core' },
-  { id: 'TXN-002', type: 'Reward', description: 'Red Light Jump • KA 02 CD 3456', amount: 150, date: 'Apr 06, 13:33', status: 'Verified', method: 'AI Core' },
-  { id: 'TXN-003', type: 'Reward', description: 'No Helmet • KA 03 MN 5678', amount: 100, date: 'Apr 06, 14:15', status: 'Processing', method: 'Manual Rev' },
-  { id: 'TXN-004', type: 'Withdrawal', description: 'Bank Transfer • UPI-9921', amount: -500, date: 'Apr 05, 18:00', status: 'Completed', method: 'Instant' },
-  { id: 'TXN-005', type: 'Reward', description: 'Wrong-Way • KA 05 XY 9012', amount: 200, date: 'Apr 06, 13:51', status: 'Pending', method: 'AI Core' },
+const transactions: any[] = [
+  { id: 'TXN-001', type: 'Reward', description: 'Red Light Jump • KA 03 MH 9982', amount: 150, date: 'Apr 13, 14:33', status: 'Verified', method: 'AI Core' },
+  { id: 'TXN-002', type: 'Reward', description: 'No Helmet • KA 01 EK 4432', amount: 100, date: 'Apr 12, 13:33', status: 'Pending', method: 'Manual Rev' },
+  { id: 'TXN-003', type: 'Rejected', description: 'Wrong-Way • KA 05 XY 9012', amount: 0, date: 'Apr 11, 14:15', status: 'Rejected', method: 'Evidence Blurry', reason: 'License plate unreadable due to rain.' },
+  { id: 'TXN-004', type: 'Withdrawal', description: 'Bank Transfer • UPI-9921', amount: -500, date: 'Apr 10, 18:00', status: 'Completed', method: 'Instant' },
+  { id: 'TXN-005', type: 'Reward', description: 'Red Light Jump • KA 09 PL 1120', amount: 150, date: 'Apr 09, 13:51', status: 'Verified', method: 'AI Core' },
 ];
 
 export default function RewardsPage() {
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const balance = transactions
     .filter((t) => t.status === 'Verified' || t.status === 'Completed')
-    .reduce((sum, t) => sum + (t.status === 'Completed' ? 0 : t.amount), 3850); // Simulating higher total
+    .reduce((sum, t) => sum + (t.status === 'Completed' ? 0 : t.amount), 3850);
 
   return (
-    <div className="flex h-screen bg-[#fafbfc]">
+    <div className="flex h-screen bg-[#fafbfc] font-sans">
       <Sidebar />
-      <main className="flex-1 ml-80 overflow-y-auto px-12 py-12">
+      <main className="flex-1 ml-80 overflow-y-auto px-12 py-10">
         <header className="flex items-center justify-between mb-12">
           <div>
-            <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">Reward Wallet</h1>
-            <p className="text-slate-400 font-bold mt-1 uppercase tracking-[0.2em] text-[10px]">Financial Hub • Bengaluru Local Center</p>
+            <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight leading-none italic">Earnings <span className="text-blue-600">Hub</span></h1>
+            <p className="text-slate-400 font-bold mt-1 uppercase tracking-[0.2em] text-[10px]">Verified Compliance Revenue • Bangalore</p>
           </div>
           <div className="flex gap-4">
              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3">
@@ -42,8 +42,7 @@ export default function RewardsPage() {
         </header>
 
         <div className="grid grid-cols-12 gap-10">
-          {/* Main Balance Card */}
-          <div className="col-span-7">
+          <div className="col-span-12 lg:col-span-7">
              <div className="bg-slate-900 rounded-[40px] p-10 text-white shadow-2xl shadow-slate-300 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/20 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-blue-600/30 transition-all duration-700" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full -ml-32 -mb-32 blur-3xl" />
@@ -54,23 +53,23 @@ export default function RewardsPage() {
                          <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10">
                             <ShieldCheck className="w-6 h-6 text-blue-400" />
                          </div>
-                         <p className="text-sm font-black tracking-widest uppercase text-white/60">Guardian Card</p>
+                         <p className="text-sm font-black tracking-widest uppercase text-white/60">CamX Guardian</p>
                       </div>
                       <CreditCard className="w-8 h-8 text-white/20" />
                    </div>
 
-                   <p className="text-sm font-black text-white/40 uppercase tracking-[0.3em] mb-2">Available Balance</p>
+                   <p className="text-sm font-black text-white/40 uppercase tracking-[0.3em] mb-2 font-sans">Total Redeemable</p>
                    <div className="flex items-baseline gap-4 mb-12">
                       <h2 className="text-6xl font-black tracking-tighter">₹{balance.toLocaleString()}</h2>
-                      <span className="text-emerald-400 font-bold text-sm bg-emerald-500/10 px-3 py-1 rounded-full">+12% this month</span>
+                      <span className="text-emerald-400 font-bold text-sm bg-emerald-500/10 px-3 py-1 rounded-full font-sans">+12% this month</span>
                    </div>
 
                    <div className="flex items-center gap-4">
                       <button 
-                        onClick={() => setIsWithdrawOpen(true)}
-                        className="flex-1 py-5 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all shadow-xl active:scale-95"
+                         onClick={() => setIsWithdrawOpen(true)}
+                         className="flex-1 py-5 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all shadow-xl active:scale-95 font-sans"
                       >
-                         Instant Cash Out
+                         Redeem to Bank
                       </button>
                       <button className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 hover:bg-white/20 transition-all">
                          <Landmark className="w-6 h-6" />
@@ -80,16 +79,15 @@ export default function RewardsPage() {
              </div>
 
              <div className="mt-10 grid grid-cols-2 gap-6">
-                <QuickStat label="Total Rewards" value="₹12,450" icon={ArrowUpRight} color="blue" />
-                <QuickStat label="Withdrawn" value="₹8,600" icon={ArrowDownLeft} color="emerald" />
+                <QuickStat label="Approved Cases" value="24" icon={CheckCircle2} color="emerald" />
+                <QuickStat label="Rejected Cases" value="2" icon={AlertCircle} color="amber" />
              </div>
           </div>
 
-          {/* Activity Feed */}
-          <div className="col-span-5 bg-white rounded-[40px] border border-slate-100 shadow-xl shadow-slate-100/50 flex flex-col">
+          <div className="col-span-12 lg:col-span-5 bg-white rounded-[40px] border border-slate-100 shadow-xl shadow-slate-100/50 flex flex-col">
              <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-                <h3 className="text-xl font-black text-slate-800 tracking-tight">Recent Ledger</h3>
-                <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Download PDF</button>
+                <h3 className="text-xl font-black text-slate-800 tracking-tight">Recent Activity Hub</h3>
+                <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">Audited Log</button>
              </div>
              <div className="p-4 space-y-4">
                 {transactions.map((t) => (
@@ -102,13 +100,19 @@ export default function RewardsPage() {
                       <div className="flex-1">
                          <div className="flex items-center gap-2 mb-1">
                             <p className="text-sm font-black text-slate-800 tracking-tight">{t.description.split('•')[0]}</p>
-                            <span className="w-1 h-1 rounded-full bg-slate-200" />
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.date}</span>
                          </div>
-                         <div className="flex items-center gap-2">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">{t.method}</p>
-                            <div className={`w-1.5 h-1.5 rounded-full ${t.status === 'Verified' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                         </div>
+                         <div className="flex flex-col gap-1">
+                             <div className="flex items-center gap-2">
+                                <p className={`text-[10px] font-bold uppercase tracking-widest leading-none ${t.status === 'Rejected' ? 'text-red-500' : 'text-slate-400'}`}>
+                                   {t.status === 'Rejected' ? 'Rejected' : t.method}
+                                </p>
+                                <div className={`w-1.5 h-1.5 rounded-full ${t.status === 'Verified' ? 'bg-emerald-400' : t.status === 'Rejected' ? 'bg-red-500' : 'bg-amber-400'}`} />
+                             </div>
+                             {t.status === 'Rejected' && t.reason && (
+                                <p className="text-[9px] text-red-400 font-bold italic leading-tight">Reason: {t.reason}</p>
+                             )}
+                          </div>
                       </div>
                       <div className="text-right">
                          <p className={`text-lg font-black tracking-tight ${t.amount > 0 ? 'text-emerald-500' : 'text-slate-800'}`}>
@@ -180,7 +184,8 @@ export default function RewardsPage() {
 function QuickStat({ label, value, icon: Icon, color }: any) {
   const colors: any = {
     blue: "bg-blue-50 text-blue-600 border-blue-100 shadow-blue-100",
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-100"
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100 shadow-amber-100"
   }
   return (
     <div className={`p-8 bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-100/50 flex flex-col justify-between group hover:border-${color}-200 transition-all`}>
@@ -205,7 +210,7 @@ function PayoutOption({ icon: Icon, title, subtitle, active }: any) {
          </div>
          <div>
             <p className="text-sm font-black text-slate-900 leading-none mb-1">{title}</p>
-            <p className="text-xs font-bold text-slate-400 italic">{subtitle}</p>
+            <p className="text-xs font-bold text-slate-400 italic font-sans">{subtitle}</p>
          </div>
          {active && <div className="ml-auto w-3 h-3 bg-blue-600 rounded-full" />}
       </div>

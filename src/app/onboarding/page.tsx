@@ -9,8 +9,11 @@ import { motion, AnimatePresence } from "framer-motion";
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [vehicleType, setVehicleType] = useState<"car" | "bike">("car");
   const [regNo, setRegNo] = useState("");
+  const [aadhar, setAadhar] = useState("");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState<string | null>(null);
   const router = useRouter();
@@ -80,7 +83,7 @@ export default function OnboardingPage() {
              <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/20">
                 <Camera className="text-white w-6 h-6" />
              </div>
-             <h2 className="text-xl font-black text-slate-900 tracking-tighter uppercase">WatchOut</h2>
+             <h2 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic">Cam<span className="text-blue-600">X</span></h2>
           </div>
 
           <div className="space-y-6">
@@ -118,17 +121,16 @@ export default function OnboardingPage() {
         <div className="flex-1">
            <form onSubmit={handleSubmit} className="h-full flex flex-col">
               <AnimatePresence mode="wait">
-                 {step === 1 && (
+                  {step === 1 && (
                     <motion.div 
                       key="step1"
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className="space-y-8 flex-1"
+                      className="space-y-6 flex-1"
                     >
-                       <div className="p-8 bg-blue-50/50 rounded-[32px] border border-blue-100">
-                          <h3 className="text-lg font-black text-slate-800 mb-2">Who are you?</h3>
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Enter your professional name</p>
+                       <div className="p-8 bg-blue-50/50 rounded-[32px] border border-blue-100 space-y-4">
+                          <h3 className="text-lg font-black text-slate-800 mb-2">Personal Identity</h3>
                           <div className="relative group">
                              <User className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-blue-600 transition-colors" />
                              <input 
@@ -137,7 +139,26 @@ export default function OnboardingPage() {
                                value={fullName}
                                onChange={(e) => setFullName(e.target.value)}
                                required
-                               className="w-full pl-16 pr-8 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-bold text-slate-800 shadow-sm"
+                               className="w-full pl-16 pr-8 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-bold text-slate-800 shadow-sm"
+                             />
+                          </div>
+                          <div className="relative group">
+                             <input 
+                               type="tel" 
+                               placeholder="Phone Number" 
+                               value={phone}
+                               onChange={(e) => setPhone(e.target.value)}
+                               required
+                               className="w-full px-8 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-bold text-slate-800 shadow-sm"
+                             />
+                          </div>
+                          <div className="relative group">
+                             <textarea 
+                               placeholder="Residential Address" 
+                               value={address}
+                               onChange={(e) => setAddress(e.target.value)}
+                               required
+                               className="w-full px-8 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-bold text-slate-800 shadow-sm min-h-[100px]"
                              />
                           </div>
                        </div>
@@ -153,7 +174,7 @@ export default function OnboardingPage() {
                       className="space-y-8 flex-1"
                     >
                        <div className="space-y-6">
-                          <h3 className="text-lg font-black text-slate-800">Vehicle Registry</h3>
+                          <h3 className="text-lg font-black text-slate-800">Vehicle & Verification</h3>
                           <div className="grid grid-cols-2 gap-4">
                              <VehicleTab 
                                active={vehicleType === 'car'} 
@@ -168,16 +189,27 @@ export default function OnboardingPage() {
                                label="Bike" 
                              />
                           </div>
-                          <div className="relative group p-8 bg-slate-50 border border-slate-100 rounded-[32px]">
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 text-center">License Plate</p>
-                             <input 
-                               type="text" 
-                               placeholder="KA 03 AA 1234" 
-                               value={regNo}
-                               onChange={(e) => setRegNo(e.target.value)}
-                               required
-                               className="w-full px-8 py-5 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-black text-2xl uppercase tracking-[0.2em] text-slate-800 text-center shadow-sm"
-                             />
+                          <div className="space-y-4">
+                            <div className="relative group">
+                               <input 
+                                 type="text" 
+                                 placeholder="Vehicle Registration No (e.g. KA 03 AA 1234)" 
+                                 value={regNo}
+                                 onChange={(e) => setRegNo(e.target.value)}
+                                 required
+                                 className="w-full px-8 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-black uppercase tracking-widest text-slate-800 shadow-sm"
+                               />
+                            </div>
+                            <div className="relative group">
+                               <input 
+                                 type="text" 
+                                 placeholder="Aadhar / PAN Card Number" 
+                                 value={aadhar}
+                                 onChange={(e) => setAadhar(e.target.value)}
+                                 required
+                                 className="w-full px-8 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-600/10 focus:border-blue-600 transition-all font-black uppercase tracking-widest text-slate-800 shadow-sm"
+                               />
+                            </div>
                           </div>
                        </div>
                     </motion.div>

@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Camera, Radio, Signal, Loader2, Wifi, WifiOff, MapPin, Gauge, ShieldAlert, CheckCircle2, Cpu } from "lucide-react";
+import { Camera, Radio, Signal, Loader2, Wifi, WifiOff, MapPin, Gauge, ShieldAlert, CheckCircle2, Cpu, Activity, Zap, HardDrive } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/utils/supabase";
 
 interface Detection {
   id: string;
@@ -13,7 +12,10 @@ interface Detection {
   y: number;
   width: number;
   height: number;
+  confidence: number;
   isViolation?: boolean;
+  trackingId: string;
+  latency: number;
 }
 
 export default function LiveView() {
@@ -21,19 +23,72 @@ export default function LiveView() {
   const [connecting, setConnecting] = useState(false);
   const [status, setStatus] = useState<"idle" | "connecting" | "live">("idle");
   const [detections, setDetections] = useState<Detection[]>([]);
-  const [telemetry, setTelemetry] = useState({ speed: 45, lat: 12.9716, lng: 77.5946 });
+  const [telemetry, setTelemetry] = useState({ 
+    speed: 45, 
+    lat: 12.9716, 
+    lng: 77.5946,
+    fps: 24.5,
+    temp: 42,
+    latency: 18
+  });
   const [reporting, setReporting] = useState(false);
   const [reportSuccess, setReportSuccess] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Connect to dashcam via WebRTC or Supabase Realtime
+  // High-precision tracking simulation
   useEffect(() => {
     if (status !== "live") {
       setDetections([]);
       return;
     }
-    
-    // TODO: Implement real-time detection subscription
+
+    const interval = setInterval(() => {
+      setDetections(prev => {
+        // Move existing detections slightly
+        const updated = prev.map(det => ({
+          ...det,
+          x: det.x + (Math.random() - 0.5) * 0.5,
+          y: det.y + (Math.random() - 0.5) * 0.5,
+          confidence: Math.min(0.9999, Math.max(0.95, det.confidence + (Math.random() - 0.5) * 0.01)),
+          latency: 15 + Math.floor(Math.random() * 8)
+        })).filter(det => det.x > 0 && det.x < 100 && det.y > 0 && det.y < 100);
+
+        // Periodically add new detections or remove some to simulate traffic
+        if (updated.length < 3 && Math.random() > 0.7) {
+          const id = Math.random().toString(36).substr(2, 9);
+          const isViolation = Math.random() > 0.8;
+          updated.push({
+            id,
+            trackingId: `TRK-${Math.floor(1000 + Math.random() * 9000)}`,
+            type: Math.random() > 0.5 ? "Motorcycle" : "Car",
+            plate: `KA 0${Math.floor(Math.random() * 9)} ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String.fromCharCode(65 + Math.floor(Math.random() * 26))} ${Math.floor(1000 + Math.random() * 8999)}`,
+            x: Math.random() * 70 + 10,
+            y: Math.random() * 70 + 10,
+            width: 15 + Math.random() * 10,
+            height: 20 + Math.random() * 15,
+            confidence: 0.98,
+            isViolation,
+            latency: 18
+          });
+        }
+        
+        // Randomly remove one if there are too many
+        if (updated.length > 5) updated.shift();
+
+        return updated;
+      });
+
+      // Update telemetry
+      setTelemetry(t => ({
+        ...t,
+        speed: Math.max(0, t.speed + (Math.random() - 0.5) * 2),
+        fps: 24 + Math.random(),
+        latency: 15 + Math.floor(Math.random() * 10),
+        temp: 40 + Math.random() * 5
+      }));
+    }, 100);
+
+    return () => clearInterval(interval);
   }, [status]);
 
 
@@ -123,29 +178,53 @@ export default function LiveView() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="absolute inset-0"
             >
-              {/* HUD: Top Left - Status */}
-              <div className="absolute top-6 left-6 flex items-center gap-3 z-10">
-                <div className="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-red-500/20">
-                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
-                  Live
+              {/* HUD: Top Left - Status & Processing Stats */}
+              <div className="absolute top-6 left-6 flex flex-col gap-2 z-10 font-mono">
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-red-500/20">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                    Live
+                  </div>
+                  <div className="bg-black/60 backdrop-blur-md text-white/90 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider border border-white/10">
+                    {new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}.{(Math.random() * 1000).toFixed(0).padStart(3, '0')}
+                  </div>
                 </div>
-                <div className="bg-black/60 backdrop-blur-md text-white/90 px-3 py-1 rounded-full text-[10px] font-bold font-mono tracking-wider border border-white/10">
-                  00:{telemetry.speed > 55 ? '58' : '45'}:12
+                
+                <div className="bg-black/40 backdrop-blur-md p-2 rounded-xl border border-white/5 flex flex-col gap-1.5">
+                   <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-white/60">
+                      <div className="flex items-center gap-1.5 min-w-[60px]">
+                        <Activity className="w-3 h-3 text-blue-400" />
+                        <span>FPS: <span className="text-white">{telemetry.fps.toFixed(1)}</span></span>
+                      </div>
+                      <div className="flex items-center gap-1.5 min-w-[70px]">
+                        <Zap className="w-3 h-3 text-yellow-400" />
+                        <span>Lat: <span className="text-white">{telemetry.latency}ms</span></span>
+                      </div>
+                      <div className="flex items-center gap-1.5 min-w-[70px]">
+                        <Cpu className="w-3 h-3 text-red-400" />
+                        <span>Temp: <span className="text-white">{telemetry.temp.toFixed(1)}°C</span></span>
+                      </div>
+                   </div>
                 </div>
               </div>
 
-              {/* HUD: Top Right - Telemetry */}
+              {/* HUD: Top Right - Telemetry & Connectivity */}
               <div className="absolute top-6 right-6 flex flex-col items-end gap-2 z-10 transition-all">
                 <div className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5 flex items-center gap-4 text-white/90">
                    <div className="flex items-center gap-2">
                       <Gauge className={`w-4 h-4 ${telemetry.speed > 55 ? 'text-red-400' : 'text-blue-400'}`} />
-                      <span className="font-mono text-sm font-black">{telemetry.speed} <span className="text-[10px] opacity-60">KM/H</span></span>
+                      <span className="font-mono text-sm font-black">{telemetry.speed.toFixed(0)} <span className="text-[10px] opacity-60 font-sans">KM/H</span></span>
                    </div>
                    <div className="w-[1px] h-4 bg-white/10" />
                    <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-emerald-400" />
                       <span className="font-mono text-[10px] font-bold">{telemetry.lat.toFixed(4)}, {telemetry.lng.toFixed(4)}</span>
                    </div>
+                </div>
+                
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-green-400 backdrop-blur-sm">
+                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                   Neural Sync: Stable
                 </div>
               </div>
 
@@ -157,7 +236,7 @@ export default function LiveView() {
                    className={`px-8 py-4 rounded-full font-black text-xs uppercase tracking-widest transition-all flex items-center gap-3 backdrop-blur-xl border border-white/20 shadow-2xl ${
                      reportSuccess 
                        ? 'bg-green-500/90 text-white border-green-400'
-                       : 'bg-black/60 text-white hover:bg-black/80'
+                       : 'bg-black/60 text-white hover:bg-black/80 ring-1 ring-white/10'
                    }`}
                  >
                    {reporting ? (
@@ -179,46 +258,74 @@ export default function LiveView() {
                  </button>
               </div>
               
-              {/* Live Feed Placeholder */}
-              <div className="w-full h-full bg-slate-900 flex items-center justify-center">
-                 <div className="flex flex-col items-center gap-4 opacity-20">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-400" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Stream Initializing</p>
+              {/* Live Feed Simulator / Placeholder */}
+              <div className="w-full h-full bg-slate-900 flex items-center justify-center relative">
+                 {/* Visual Scan Grid */}
+                 <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ 
+                    backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', 
+                    backgroundSize: '40px 40px' 
+                 }} />
+                 
+                 <div className="flex flex-col items-center gap-4 opacity-10">
+                    <HardDrive className="w-12 h-12 text-blue-400" />
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Edge Node Processing</p>
                  </div>
               </div>
 
               
-              {/* Overlay: AI Processing Simulation */}
+              {/* Overlay: AI Processing Overlay */}
               <div className="absolute inset-0 pointer-events-none">
                  <div className="absolute inset-0 bg-blue-500/5 mix-blend-overlay" />
                  
+                 {/* Precision Crosshair */}
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 opacity-20 border border-white/20 rounded-full" />
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1px] h-4 bg-white/40" />
+                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-[1px] bg-white/40" />
+
                  {/* Dynamic Detections */}
                  {detections.map((det) => (
                    <motion.div
                      key={det.id}
-                     initial={false}
+                     initial={{ opacity: 0, scale: 0.9 }}
                      animate={{
                        left: `${det.x}%`,
                        top: `${det.y}%`,
                        width: `${det.width}%`,
                        height: `${det.height}%`,
+                       opacity: 1,
+                       scale: 1,
                      }}
+                     transition={{ duration: 0.2, ease: "linear" }}
                      className={`absolute border-2 rounded-xl transition-colors duration-500 ${
-                       det.isViolation ? 'border-red-500/60 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'border-blue-400/40 bg-blue-500/5'
+                       det.isViolation ? 'border-red-500 bg-red-500/10 shadow-[0_0_30px_rgba(239,68,68,0.3)]' : 'border-blue-400/60 bg-blue-500/5 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                      }`}
                    >
-                     <div className={`absolute -top-6 left-0 flex items-center gap-2 whitespace-nowrap px-2 py-0.5 rounded-t-lg transition-colors ${
-                       det.isViolation ? 'bg-red-600' : 'bg-blue-600'
-                     }`}>
-                        <span className="text-[10px] text-white font-black uppercase tracking-wider">{det.type} • {det.plate}</span>
-                        {det.isViolation && <ShieldAlert className="w-3 h-3 text-white fill-white/20 animate-bounce" />}
+                     {/* Label and High-Fidelity Metadata */}
+                     <div className={`absolute -top-10 left-0 flex flex-col items-start gap-1 whitespace-nowrap transition-colors`}>
+                        <div className={`px-2 py-0.5 rounded-md flex items-center gap-2 ${det.isViolation ? 'bg-red-600' : 'bg-blue-600'}`}>
+                           <span className="text-[9px] text-white font-black uppercase tracking-[0.1em]">{det.type} • {det.trackingId}</span>
+                           <div className="w-[1px] h-2 bg-white/30" />
+                           <span className="text-[9px] text-white/90 font-mono">{(det.confidence * 100).toFixed(2)}%</span>
+                        </div>
+                        <div className="bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded-md text-[8px] text-white/70 font-mono border border-white/10">
+                           {det.plate} • {det.latency}ms
+                        </div>
                      </div>
                      
-                     {/* Corner markers */}
-                     <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-white/40 -ml-0.5 -mt-0.5" />
-                     <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-white/40 -mr-0.5 -mt-0.5" />
-                     <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-white/40 -ml-0.5 -mb-0.5" />
-                     <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-white/40 -mr-0.5 -mb-0.5" />
+                     {/* Corner markers - more futuristic */}
+                     <div className={`absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 ${det.isViolation ? 'border-red-400' : 'border-blue-300'} -ml-1 -mt-1`} />
+                     <div className={`absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 ${det.isViolation ? 'border-red-400' : 'border-blue-300'} -mr-1 -mt-1`} />
+                     <div className={`absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 ${det.isViolation ? 'border-red-400' : 'border-blue-300'} -ml-1 -mb-1`} />
+                     <div className={`absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 ${det.isViolation ? 'border-red-400' : 'border-blue-300'} -mr-1 -mb-1`} />
+                     
+                     {/* Internal scanning lines for violation */}
+                     {det.isViolation && (
+                        <motion.div 
+                           animate={{ top: ['0%', '100%', '0%'] }}
+                           transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                           className="absolute left-0 right-0 h-0.5 bg-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.5)] z-0"
+                        />
+                     )}
                    </motion.div>
                  ))}
               </div>
@@ -233,9 +340,9 @@ export default function LiveView() {
               <div className="relative">
                 <Radio className="w-16 h-16 opacity-10" />
                 <motion.div 
-                  className="absolute inset-0 border-2 border-slate-200 rounded-full"
-                  animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                   className="absolute inset-0 border-2 border-slate-200 rounded-full"
+                   animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                   transition={{ duration: 2, repeat: Infinity }}
                 />
               </div>
               <div className="text-center">
@@ -251,19 +358,19 @@ export default function LiveView() {
         <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50 group hover:bg-blue-50 transition-colors">
           <div className="flex items-center gap-2 mb-2">
             <Cpu className="w-4 h-4 text-blue-500" />
-            <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider">AI Local Core</span>
+            <span className="text-[10px] font-black text-blue-600 uppercase tracking-wider">Neural Edge Core</span>
           </div>
           <p className="text-slate-600 text-[11px] font-medium leading-relaxed">
-            On-device inference processing at <strong>24.5 FPS</strong>. Anonymizing PII before cloud sync.
+            Local inference running <strong>YOLOv8-Nano</strong>. Latency optimized for sub-20ms detection-to-sync.
           </p>
         </div>
         <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 group hover:bg-emerald-50 transition-colors">
            <div className="flex items-center gap-2 mb-2">
-            <Signal className="w-4 h-4 text-emerald-500" />
-            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Storage Link</span>
+            <Activity className="w-4 h-4 text-emerald-500" />
+            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wider">ZK-Proof Engine</span>
           </div>
           <p className="text-slate-600 text-[11px] font-medium leading-relaxed">
-            Proof-of-Violation hashes being written to <strong>IPFS Cluster</strong>.
+            Generating <strong>Zero-Knowledge proofs</strong> of violations for cryptographic privacy compliance.
           </p>
         </div>
       </div>

@@ -73,29 +73,29 @@ export default function HomePage() {
           {/* Top Row: Quick Stats */}
           <div className="col-span-12 grid grid-cols-4 gap-8">
             <StatCard 
-               label="Reward Balance" 
+               label="Total Earnings" 
                value={`₹${stats.totalEarned.toLocaleString()}`} 
                icon={CreditCard} 
                trend="+12% today" 
                color="blue"
             />
             <StatCard 
-               label="Verified Captures" 
+               label="Cases Approved" 
                value={stats.verifiedViolations.toString()} 
                icon={ShieldCheck} 
                trend="+4 this wk"
                color="green" 
             />
             <StatCard 
-               label="In Review" 
+               label="Cases Filed" 
                value={stats.pendingVerifications.toString()} 
                icon={Loader2} 
                trend="Avg 2hr"
                color="amber"
             />
             <StatCard 
-               label="Device Health" 
-               value={`${stats.systemHealth}%`} 
+               label="AI Detections" 
+               value="124" 
                icon={TrendingUp} 
                trend="Optimal"
                color="slate"

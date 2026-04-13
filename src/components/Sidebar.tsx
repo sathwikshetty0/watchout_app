@@ -15,7 +15,8 @@ import {
   Target,
   Car,
   Bike,
-  Wifi
+  Wifi,
+  Camera
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -53,9 +54,15 @@ export default function Sidebar() {
     router.push("/login");
   };
 
-  const navItems = [
+  const isPolice = pathname?.startsWith('/police');
+
+  const navItems = isPolice ? [
+    { label: "Case Inbox", icon: ShieldCheck, href: "/police/dashboard" },
+    { label: "Account Settings", icon: Settings, href: "/settings" },
+  ] : [
     { label: "Overview", icon: Target, href: "/" },
     { label: "Live Detection", icon: History, href: "/feed" },
+    { label: "Cloud Recordings", icon: History, href: "/recordings" },
     { label: "Reward Wallet", icon: CreditCard, href: "/rewards" },
     { label: "Map Interface", icon: MapPin, href: "/map" },
     { label: "Compliance Log", icon: ShieldCheck, href: "/compliance" },
@@ -66,14 +73,14 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 h-screen w-80 bg-white border-r border-slate-100 flex flex-col p-10 z-50">
       {/* Brand */}
       <div className="flex items-center gap-5 mb-14 group cursor-pointer">
-        <div className="w-14 h-14 bg-slate-900 rounded-[22px] flex items-center justify-center shadow-2xl shadow-slate-200 group-hover:scale-110 transition-transform duration-500">
-          <ShieldCheck className="text-blue-400 w-7 h-7" />
+        <div className="w-14 h-14 bg-blue-600 rounded-[22px] flex items-center justify-center shadow-2xl shadow-blue-500/20 group-hover:scale-110 transition-transform duration-500">
+          <Camera className="text-white w-7 h-7" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-none">WatchOut</h2>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight leading-none italic">Cam<span className="text-blue-600">X</span></h2>
           <div className="flex items-center gap-2 mt-1.5">
              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Node • v2.1</p>
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Active AI Node</p>
           </div>
         </div>
       </div>
